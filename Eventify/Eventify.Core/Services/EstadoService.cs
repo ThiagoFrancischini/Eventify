@@ -1,4 +1,5 @@
 ﻿using Eventify.Core.Entities;
+using Eventify.Core.Interfaces.Repositories;
 using Eventify.Core.Interfaces.Services;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,15 @@ namespace Eventify.Core.Services
 {
     public class EstadoService : IEstadoService
     {
-        public Task<List<Estado>> GetEstados()
+        private readonly IUnitOfWork _unitOfWork;
+        public EstadoService(IUnitOfWork unitOfWork)
         {
-            throw new NotImplementedException();
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<List<Estado>> GetEstados()
+        {
+            return await _unitOfWork.EstadoRepository.GetEstados();
         }
     }
 }

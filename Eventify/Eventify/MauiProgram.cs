@@ -1,4 +1,6 @@
-﻿using Eventify.Infrastructure.Data;
+﻿using Eventify.Core.Interfaces.Repositories;
+using Eventify.Infrastructure.Data;
+using Eventify.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,8 @@ namespace Eventify
 
             builder.Services.AddDbContext<EventifyDbContext>(options =>
                 options.UseNpgsql(connectionString));
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddMauiBlazorWebView();
 
