@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Eventify.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace Eventify
 {
@@ -13,6 +17,16 @@ namespace Eventify
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
+
+            var a = Assembly.GetExecutingAssembly();
+            using var stream = a.GetManifestResourceStream("Eventify.appsettings.json");
+            var config = new ConfigurationBuilder().AddJsonStream(stream).Build();
+            builder.Configuration.AddConfiguration(config);
+
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            builder.Services.AddDbContext<EventifyDbContext>(options =>
+                options.UseNpgsql(connectionString));
 
             builder.Services.AddMauiBlazorWebView();
 

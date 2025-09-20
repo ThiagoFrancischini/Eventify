@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventify", "Eventify\Eventify.csproj", "{418185E2-E1CA-4D96-AB8D-124ADBDCADA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventify.Core", "Eventify.Core\Eventify.Core.csproj", "{8BF2474A-6FB3-4BAB-80EA-9B8CD4AEBC89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eventify.Infrastructure", "Eventify.Infrastructure\Eventify.Infrastructure.csproj", "{0D0CBE42-7FA3-4BED-A76A-B633D5FB0898}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{418185E2-E1CA-4D96-AB8D-124ADBDCADA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{418185E2-E1CA-4D96-AB8D-124ADBDCADA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{418185E2-E1CA-4D96-AB8D-124ADBDCADA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF2474A-6FB3-4BAB-80EA-9B8CD4AEBC89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BF2474A-6FB3-4BAB-80EA-9B8CD4AEBC89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BF2474A-6FB3-4BAB-80EA-9B8CD4AEBC89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BF2474A-6FB3-4BAB-80EA-9B8CD4AEBC89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D0CBE42-7FA3-4BED-A76A-B633D5FB0898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D0CBE42-7FA3-4BED-A76A-B633D5FB0898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D0CBE42-7FA3-4BED-A76A-B633D5FB0898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D0CBE42-7FA3-4BED-A76A-B633D5FB0898}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
