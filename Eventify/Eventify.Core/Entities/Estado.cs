@@ -9,7 +9,7 @@ namespace Eventify.Core.Entities
     public class Estado
     {
         public Guid Id { get; set; }
-        public string Nome { get; set; }
-        public string Sigla { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public string Sigla { get; set; } = string.Empty;
     }
 }

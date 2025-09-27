@@ -10,6 +10,8 @@ namespace Eventify.Core.Interfaces.Repositories
     {
         IEstadoRepository EstadoRepository { get; }
         IUsuarioRepository UsuarioRepository { get; }
+        ICidadeRepository CidadeRepository { get; }
+        IEnderecoRepository EnderecoRepository { get; }
         Task<int> CompleteAsync();
     }
 }

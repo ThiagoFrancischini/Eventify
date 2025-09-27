@@ -9,6 +9,8 @@ namespace Eventify.Core.Interfaces.Services
 {
     public interface IEstadoService
     {
-        public Task<List<Estado>> GetEstados();
+        Task<List<Estado>> GetAllAsync();
+        Task<Estado?> GetByIdAsync(Guid id);
+        Task<Estado> CriarEstadoAsync(Estado novoEstado);
     }
 }

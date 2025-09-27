@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Eventify.Core.Interfaces.Repositories
 {
-    public interface IEstadoRepository
+    public interface IEnderecoRepository
     {
-        Task<List<Estado>> GetEstados();
-        Task Salvar(Estado estado);
-        Task<Estado?> GetById(Guid id);
+        Task<Endereco?> GetById(Guid id);
+        Task Salvar(Endereco endereco);
+        Task<List<Endereco>> GetByCep(string cep);
     }
 }

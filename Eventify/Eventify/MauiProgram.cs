@@ -30,8 +30,12 @@ namespace Eventify
             builder.Services.AddDbContext<EventifyDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IEstadoRepository, EstadoRepository>();
+            builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            builder.Services.AddScoped<ICidadeRepository, CidadeRepository>();
+            builder.Services.AddScoped<IEnderecoRepository, EnderecoRepository>();
 
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG

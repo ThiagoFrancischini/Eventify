@@ -1,10 +1,5 @@
 ﻿using Eventify.Core.Interfaces.Repositories;
 using Eventify.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Eventify.Infrastructure.Repositories
 {
@@ -12,17 +7,24 @@ namespace Eventify.Infrastructure.Repositories
     {
         private readonly EventifyDbContext _context;
 
-        private IEstadoRepository _estadoRepository;
-        private IUsuarioRepository _usuarioRepository;
+        public IEstadoRepository EstadoRepository { get; }
+        public IUsuarioRepository UsuarioRepository { get; }
+        public ICidadeRepository CidadeRepository { get; }
+        public IEnderecoRepository EnderecoRepository { get; }
 
-        public UnitOfWork(EventifyDbContext context)
+        public UnitOfWork(
+            EventifyDbContext context,
+            IEstadoRepository estadoRepository,
+            IUsuarioRepository usuarioRepository,
+            ICidadeRepository cidadeRepository,
+            IEnderecoRepository enderecoRepository)
         {
             _context = context;
+            EstadoRepository = estadoRepository;
+            UsuarioRepository = usuarioRepository;
+            CidadeRepository = cidadeRepository;
+            EnderecoRepository = enderecoRepository;
         }
-
-        public IEstadoRepository EstadoRepository => _estadoRepository ??= new EstadoRepository(_context);
-
-        public IUsuarioRepository UsuarioRepository => _usuarioRepository ??= new UsuarioRepository(_context);
 
         public async Task<int> CompleteAsync()
         {
@@ -32,6 +34,7 @@ namespace Eventify.Infrastructure.Repositories
         public void Dispose()
         {
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

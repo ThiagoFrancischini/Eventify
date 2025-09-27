@@ -20,7 +20,26 @@ namespace Eventify.Infrastructure.Repositories
 
         public async Task<List<Estado>> GetEstados()
         {
-            return await _context.Estados.ToListAsync();
+            return await _context.Estados.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<Estado?> GetById(Guid id)
+        {
+            return await _context.Estados.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public async Task Salvar(Estado estado)
+        {
+            var existingState = await _context.Estados.FindAsync(estado.Id);
+
+            if (existingState == null)
+            {
+                await _context.Estados.AddAsync(estado);
+            }
+            else
+            {
+                _context.Entry(existingState).CurrentValues.SetValues(estado);
+            }
         }
     }
 }
