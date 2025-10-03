@@ -16,6 +16,5 @@ namespace Eventify.Core.Entities
         public Guid EventoId { get; set; }
         public Evento Evento { get; set; }
         public Ingresso[] Ingressos { get; set; }
-
     }
 }

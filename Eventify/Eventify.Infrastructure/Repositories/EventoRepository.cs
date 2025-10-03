@@ -53,7 +53,7 @@ namespace Eventify.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Evento>> GetByData(DateOnly data)
+        public async Task<List<Evento>> GetByData(DateTime data)
         {
             return await _context.Eventos
                 .Include(e => e.CategoriasIngressos)

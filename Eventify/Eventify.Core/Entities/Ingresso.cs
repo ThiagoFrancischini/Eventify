@@ -12,14 +12,12 @@ namespace Eventify.Core.Entities
         public Guid UsuarioCompraId { get; set; }
         public Usuario UsuarioCompra { get; set; }
         public bool Valido { get; set; }
-        public DateOnly DataCompra { get; set; }
-        public DateOnly? DataUso { get; set; }
+        public DateTime DataCompra { get; set; }
+        public DateTime? DataUso { get; set; }
         public string Codigo { get; set; }
         public Guid EventoId { get; set; }
         public Evento Evento { get; set; }
         public Guid CategoriaIngressoId { get; set; }
         public CategoriaIngresso CategoriaIngresso { get; set; }
-
-
     }
 }

@@ -12,7 +12,7 @@ namespace Eventify.Core.Interfaces.Repositories
         Task<List<Evento>> GetEventos();
         Task<Evento?> GetById(Guid id);
         Task<List<Evento>> GetByCategoria(string categoria);
-        Task<List<Evento>> GetByData(DateOnly data);
+        Task<List<Evento>> GetByData(DateTime data);
         Task Salvar(Evento evento);
         Task Remover(Guid id);
     }

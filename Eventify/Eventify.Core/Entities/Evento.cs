@@ -11,9 +11,9 @@ namespace Eventify.Core.Entities
         public Guid Id { get; set; }
         public string Titulo { get; set; }
         public string Descricao { get; set; }
-        public DateOnly Data { get; set; }
-        public TimeOnly HoraInicio { get; set; }
-        public TimeOnly HoraFim { get; set; }
+        public DateTime Data { get; set; }
+        public TimeSpan HoraInicio { get; set; }
+        public TimeSpan HoraFim { get; set; }
         public string MaisSobre { get; set; }
         public string ImagemEvento { get; set; }
         public string Status { get; set; }
@@ -21,6 +21,5 @@ namespace Eventify.Core.Entities
         public Guid EnderecoId { get; set; }
         public Endereco Endereco { get; set; }
         public CategoriaIngresso[] CategoriasIngressos { get; set; }
-
     }
 }
