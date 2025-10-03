@@ -12,6 +12,9 @@ namespace Eventify.Core.Interfaces.Repositories
         IUsuarioRepository UsuarioRepository { get; }
         ICidadeRepository CidadeRepository { get; }
         IEnderecoRepository EnderecoRepository { get; }
+        IEventoRepository EventoRepository { get; }
+        IIngressoRepository IngressoRepository { get; } 
+        ICategoriasIngressoRepository CategoriasIngressoRepository { get; }
         Task<int> CompleteAsync();
     }
 }

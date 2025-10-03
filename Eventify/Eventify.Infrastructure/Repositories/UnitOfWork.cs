@@ -11,19 +11,29 @@ namespace Eventify.Infrastructure.Repositories
         public IUsuarioRepository UsuarioRepository { get; }
         public ICidadeRepository CidadeRepository { get; }
         public IEnderecoRepository EnderecoRepository { get; }
+        public IIngressoRepository IngressoRepository { get; }
+        public IEventoRepository EventoRepository { get; }
+        public ICategoriasIngressoRepository CategoriasIngressoRepository { get; }
 
         public UnitOfWork(
             EventifyDbContext context,
             IEstadoRepository estadoRepository,
             IUsuarioRepository usuarioRepository,
             ICidadeRepository cidadeRepository,
-            IEnderecoRepository enderecoRepository)
+            IEnderecoRepository enderecoRepository,
+            IIngressoRepository ingressoRepository,
+            IEventoRepository eventoRepository,
+            ICategoriasIngressoRepository categoriasIngressoRepository
+            )
         {
             _context = context;
             EstadoRepository = estadoRepository;
             UsuarioRepository = usuarioRepository;
             CidadeRepository = cidadeRepository;
             EnderecoRepository = enderecoRepository;
+            IngressoRepository = ingressoRepository;
+            EventoRepository = eventoRepository;
+            CategoriasIngressoRepository = categoriasIngressoRepository;
         }
 
         public async Task<int> CompleteAsync()
