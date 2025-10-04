@@ -7,6 +7,7 @@ namespace Eventify.Core.Interfaces.Services
     {
         Task<Usuario?> GetByIdAsync(Guid id);
         Task<List<Usuario>> GetAllAsync();
+        Task<Usuario> Autenticar(Usuario usuario);
         Task<Usuario> CriarNovoUsuarioAsync(Usuario novoUsuario);
     }
 }

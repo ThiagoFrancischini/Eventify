@@ -1,0 +1,183 @@
+﻿.login-page-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.gradient-panel {
+    flex: 1;
+    background: linear-gradient(to bottom right, #FF5733, #DA1D69, #C70039);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.app-title {
+    margin: 0;
+    font-family: 'Arial Black', sans-serif;
+    letter-spacing: 3px;
+}
+
+.login-form-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 2rem;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.welcome-text {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2.5rem;
+    text-transform: uppercase;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+}
+
+.login-input {
+    border-radius: 25px;
+    padding: 12px 20px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+    .login-input:focus {
+        border-color: #DA1D69;
+        box-shadow: 0 0 0 0.25rem rgba(218, 29, 105, 0.25);
+    }
+
+.input-group .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: none;
+}
+
+.toggle-password {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+    color: #495057;
+    border-radius: 25px;
+    padding: 0.75rem 1rem;
+}
+
+    .toggle-password:hover {
+        background-color: #e2e6ea;
+    }
+
+
+.forgot-password-link {
+    text-align: right;
+    width: 100%;
+    max-width: 380px;
+    margin-top: 0.5rem;
+    font-size: 0.9em;
+}
+
+    .forgot-password-link a {
+        color: #DA1D69;
+        font-weight: 600;
+    }
+
+        .forgot-password-link a:hover {
+            color: #C70039;
+        }
+
+.login-button {
+    background-color: #FF8C00;
+    border-color: #FF8C00;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    width: 100%;
+    max-width: 380px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+    .login-button:hover {
+        background-color: #E67A00;
+        border-color: #E67A00;
+    }
+
+.app-footer {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+/* Estilo para a seção do link de cadastro */
+.register-link-section {
+    text-align: center; /* Centraliza o texto */
+    color: #6c757d; /* Cor de texto padrão (cinza) */
+    font-size: 0.9em;
+}
+
+    /* Estilo para a parte clicável "Cadastre-se" */
+    .register-link-section a {
+        color: #DA1D69; /* Mesma cor do link "Esqueci minha senha" */
+        transition: color 0.2s ease;
+    }
+
+        .register-link-section a:hover {
+            color: #C70039; /* Escurece um pouco no hover */
+        }
+
+@media (max-width: 768px) {
+    .login-page-wrapper {
+        flex-direction: column;
+    }
+
+    .gradient-panel {
+        flex: none;
+        height: 150px;
+        font-size: 2rem;
+    }
+
+    .login-form-panel {
+        flex: 1;
+        justify-content: flex-start;
+        padding-top: 3rem;
+    }
+
+    .welcome-text {
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+    }
+
+    .login-form, .forgot-password-link, .login-button {
+        max-width: 300px;
+    }
+
+    .app-footer {
+        position: static;
+        margin-top: 2rem;
+        text-align: center;
+        width: 100%;
+        right: auto;
+    }
+}

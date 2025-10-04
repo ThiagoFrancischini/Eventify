@@ -1,0 +1,167 @@
+﻿@page "/cadastro"
+@layout Components.Layout.EmptyLayout
+@inject NavigationManager NavigationManager
+
+@using Eventify.Core.Entities
+
+<div class="register-page-wrapper">
+    <div class="gradient-panel">
+        <h2 class="app-title">EVENTIFY</h2>
+    </div>
+
+    <div class="register-form-panel">
+        <h2 class="welcome-text">CRIE SUA CONTA</h2>
+
+        <EditForm Model="usuario" OnValidSubmit="CadastrarUsuario" class="register-form">
+            <DataAnnotationsValidator />
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <InputText class="form-control" @bind-Value="usuario.Nome" />
+                </div>
+                <div class="form-group">
+                    <label>CPF</label>
+                    <InputText class="form-control" @bind-Value="usuario.Cpf" />
+                </div>
+                <div class="form-group">
+                    <label>Data de Nascimento</label>
+                    <InputDate class="form-control" @bind-Value="usuario.Dt_Nascimento" />
+                </div>
+                <div class="form-group">
+                    <label>Celular</label>
+                    <InputText class="form-control" @bind-Value="usuario.Celular" />
+                </div>
+
+                <div class="form-group form-span-2">
+                    <label>Email</label>
+                    <InputText class="form-control" @bind-Value="usuario.Email" />
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <InputText type="password" class="form-control" @bind-Value="usuario.Senha" />
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Senha</label>
+                    <InputText type="password" class="form-control" @bind-Value="confirmarSenha" />
+                </div>
+
+                <div class="form-group">
+                    <label>CEP</label>
+                    <InputText class="form-control" @bind-Value="usuario.Endereco.Cep" />
+                </div>
+                <div class="form-group">
+                    <label>Estado (UF)</label>
+                    <InputSelect class="form-select" @bind-Value="selectedEstadoId" @onchange="HandleEstadoChange">
+                        <option value="">Selecione um Estado</option>
+                        @foreach (var estado in listaDeEstados)
+                        {
+                            <option value="@estado.Id">@estado.Sigla</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="form-group form-span-2">
+                    <label>Cidade</label>
+                    <InputSelect class="form-select" @bind-Value="usuario.Endereco.CidadeId" disabled="@(string.IsNullOrEmpty(selectedEstadoId))">
+                        <option value="">Selecione uma Cidade</option>
+                        @foreach (var cidade in listaDeCidadesDisponiveis)
+                        {
+                            <option value="@cidade.Id">@cidade.Nome</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="form-group form-span-2">
+                    <label>Rua</label>
+                    <InputText class="form-control" @bind-Value="usuario.Endereco.Rua" />
+                </div>
+                <div class="form-group">
+                    <label>Bairro</label>
+                    <InputText class="form-control" @bind-Value="usuario.Endereco.Bairro" />
+                </div>
+                <div class="form-group">
+                    <label>Número</label>
+                    <InputText class="form-control" @bind-Value="usuario.Endereco.Numero" />
+                </div>
+                <div class="form-group form-span-2">
+                    <label>Complemento</label>
+                    <InputText class="form-control" @bind-Value="usuario.Endereco.Complemento" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block register-button mt-4">Cadastrar</button>
+
+            <div class="login-link-section mt-3">
+                <span>Já possui uma conta? </span>
+                <a href="#" @onclick="NavegarParaLogin" @onclick:preventDefault class="fw-bold text-decoration-none">Faça Login</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Usuario usuario = new Usuario();
+    private string confirmarSenha = string.Empty;
+    private string selectedEstadoId = string.Empty;
+
+    private List<Estado> listaDeEstados = new();
+    private List<Cidade> listaDeCidadesDisponiveis = new();
+
+    private Dictionary<Guid, List<Cidade>> todasAsCidades = new();
+
+    protected override void OnInitialized()
+    {
+        var rsId = Guid.NewGuid();
+        var scId = Guid.NewGuid();
+        var prId = Guid.NewGuid();
+
+        listaDeEstados = new List<Estado>
+        {
+            new Estado { Id = rsId, Nome = "Rio Grande do Sul", Sigla = "RS" },
+            new Estado { Id = scId, Nome = "Santa Catarina", Sigla = "SC" },
+            new Estado { Id = prId, Nome = "Paraná", Sigla = "PR" }
+        };
+
+        todasAsCidades[rsId] = new List<Cidade>
+        {
+            new Cidade { Id = Guid.NewGuid(), Nome = "Caxias do Sul", EstadoId = rsId },
+            new Cidade { Id = Guid.NewGuid(), Nome = "Porto Alegre", EstadoId = rsId },
+            new Cidade { Id = Guid.NewGuid(), Nome = "Gramado", EstadoId = rsId }
+        };
+        todasAsCidades[scId] = new List<Cidade>
+        {
+            new Cidade { Id = Guid.NewGuid(), Nome = "Florianópolis", EstadoId = scId },
+            new Cidade { Id = Guid.NewGuid(), Nome = "Blumenau", EstadoId = scId }
+        };
+        todasAsCidades[prId] = new List<Cidade>
+        {
+            new Cidade { Id = Guid.NewGuid(), Nome = "Curitiba", EstadoId = prId },
+            new Cidade { Id = Guid.NewGuid(), Nome = "Londrina", EstadoId = prId }
+        };
+    }
+
+    private void HandleEstadoChange(ChangeEventArgs e)
+    {
+        selectedEstadoId = e.Value.ToString();
+        usuario.Endereco.CidadeId = Guid.Empty;
+
+        if (Guid.TryParse(selectedEstadoId, out var estadoIdGuid))
+        {
+            listaDeCidadesDisponiveis = todasAsCidades.ContainsKey(estadoIdGuid) ? todasAsCidades[estadoIdGuid] : new List<Cidade>();
+        }
+        else
+        {
+            listaDeCidadesDisponiveis.Clear();
+        }
+    }
+
+    private async Task CadastrarUsuario()
+    {
+        Console.WriteLine("Tentativa de cadastro do usuário: " + usuario.Nome);
+        await Task.CompletedTask;
+    }
+
+    private void NavegarParaLogin()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

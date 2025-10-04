@@ -1,4 +1,6 @@
 ﻿using Eventify.Core.Interfaces.Repositories;
+using Eventify.Core.Interfaces.Services;
+using Eventify.Core.Services;
 using Eventify.Infrastructure.Data;
 using Eventify.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,7 @@ namespace Eventify
             builder.Services.AddDbContext<EventifyDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
+            //repositorios
             builder.Services.AddScoped<IEstadoRepository, EstadoRepository>();
             builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             builder.Services.AddScoped<ICidadeRepository, CidadeRepository>();
@@ -37,8 +40,13 @@ namespace Eventify
             builder.Services.AddScoped<IEventoRepository, EventoRepository>();
             builder.Services.AddScoped<IIngressoRepository, IngressoRepository>();
             builder.Services.AddScoped<ICategoriasIngressoRepository, CategoriasIngressoRepository>();
-
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            //servicos
+            builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+
+            //maui
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
