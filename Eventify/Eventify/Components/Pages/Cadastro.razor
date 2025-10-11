@@ -1,7 +1,12 @@
 ﻿@page "/cadastro"
 @layout Components.Layout.EmptyLayout
 @inject NavigationManager NavigationManager
+@inject IEstadoService estadoService
+@inject ICidadeService cidadeService
+@inject IUsuarioService usuarioService
 
+@using Eventify.Models
+@using Eventify.Mapping
 @using Eventify.Core.Entities
 
 <div class="register-page-wrapper">
@@ -12,79 +17,106 @@
     <div class="register-form-panel">
         <h2 class="welcome-text">CRIE SUA CONTA</h2>
 
-        <EditForm Model="usuario" OnValidSubmit="CadastrarUsuario" class="register-form">
+        <EditForm Model="usuarioModel" OnValidSubmit="CadastrarUsuario" class="register-form">
             <DataAnnotationsValidator />
 
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nome Completo</label>
-                    <InputText class="form-control" @bind-Value="usuario.Nome" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Nome" />
+                    <ValidationMessage For="@(() => usuarioModel.Nome)" />
                 </div>
                 <div class="form-group">
                     <label>CPF</label>
-                    <InputText class="form-control" @bind-Value="usuario.Cpf" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Cpf" />
+                    <ValidationMessage For="@(() => usuarioModel.Cpf)" />
                 </div>
                 <div class="form-group">
                     <label>Data de Nascimento</label>
-                    <InputDate class="form-control" @bind-Value="usuario.Dt_Nascimento" />
+                    <InputDate class="form-control" @bind-Value="usuarioModel.Dt_Nascimento" />
+                    <ValidationMessage For="@(() => usuarioModel.Dt_Nascimento)" />
                 </div>
                 <div class="form-group">
                     <label>Celular</label>
-                    <InputText class="form-control" @bind-Value="usuario.Celular" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Celular" />
+                    <ValidationMessage For="@(() => usuarioModel.Celular)" />
                 </div>
-
                 <div class="form-group form-span-2">
                     <label>Email</label>
-                    <InputText class="form-control" @bind-Value="usuario.Email" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Email" />
+                    <ValidationMessage For="@(() => usuarioModel.Email)" />
                 </div>
                 <div class="form-group">
                     <label>Senha</label>
-                    <InputText type="password" class="form-control" @bind-Value="usuario.Senha" />
+                    <InputText type="password" class="form-control" @bind-Value="usuarioModel.Senha" />
+                    <ValidationMessage For="@(() => usuarioModel.Senha)" />
                 </div>
                 <div class="form-group">
                     <label>Confirmar Senha</label>
-                    <InputText type="password" class="form-control" @bind-Value="confirmarSenha" />
+                    <InputText type="password" class="form-control" @bind-Value="usuarioModel.ConfirmarSenha" />
+                    <ValidationMessage For="@(() => usuarioModel.ConfirmarSenha)" />
                 </div>
 
                 <div class="form-group">
                     <label>CEP</label>
-                    <InputText class="form-control" @bind-Value="usuario.Endereco.Cep" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Endereco.Cep" />
+                    <ValidationMessage For="@(() => usuarioModel.Endereco.Cep)" />
                 </div>
+
                 <div class="form-group">
                     <label>Estado (UF)</label>
-                    <InputSelect class="form-select" @bind-Value="selectedEstadoId" @onchange="HandleEstadoChange">
+                    <InputSelect class="form-select" @bind-Value="SelectedEstadoId">
                         <option value="">Selecione um Estado</option>
                         @foreach (var estado in listaDeEstados)
                         {
                             <option value="@estado.Id">@estado.Sigla</option>
                         }
                     </InputSelect>
+                    <ValidationMessage For="@(() => usuarioModel.Endereco.EstadoId)" />
                 </div>
+
                 <div class="form-group form-span-2">
                     <label>Cidade</label>
-                    <InputSelect class="form-select" @bind-Value="usuario.Endereco.CidadeId" disabled="@(string.IsNullOrEmpty(selectedEstadoId))">
-                        <option value="">Selecione uma Cidade</option>
-                        @foreach (var cidade in listaDeCidadesDisponiveis)
+                    <InputSelect class="form-select" @bind-Value="usuarioModel.Endereco.CidadeId"
+                                 disabled="@(SelectedEstadoId == null || carregandoCidades)">
+                        @if (carregandoCidades)
                         {
-                            <option value="@cidade.Id">@cidade.Nome</option>
+                            <option>Carregando cidades...</option>
+                        }
+                        else if (SelectedEstadoId.HasValue)
+                        {
+                            <option value="">Selecione uma Cidade</option>
+                            @foreach (var cidade in listaDeCidadesDisponiveis)
+                            {
+                                <option value="@cidade.Id">@cidade.Nome</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>Selecione um estado primeiro</option>
                         }
                     </InputSelect>
+                    <ValidationMessage For="@(() => usuarioModel.Endereco.CidadeId)" />
                 </div>
+
                 <div class="form-group form-span-2">
                     <label>Rua</label>
-                    <InputText class="form-control" @bind-Value="usuario.Endereco.Rua" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Endereco.Rua" />
+                    <ValidationMessage For="@(() => usuarioModel.Endereco.Rua)" />
                 </div>
                 <div class="form-group">
                     <label>Bairro</label>
-                    <InputText class="form-control" @bind-Value="usuario.Endereco.Bairro" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Endereco.Bairro" />
+                    <ValidationMessage For="@(() => usuarioModel.Endereco.Bairro)" />
                 </div>
                 <div class="form-group">
                     <label>Número</label>
-                    <InputText class="form-control" @bind-Value="usuario.Endereco.Numero" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Endereco.Numero" />
+                    <ValidationMessage For="@(() => usuarioModel.Endereco.Numero)" />
                 </div>
                 <div class="form-group form-span-2">
                     <label>Complemento</label>
-                    <InputText class="form-control" @bind-Value="usuario.Endereco.Complemento" />
+                    <InputText class="form-control" @bind-Value="usuarioModel.Endereco.Complemento" />
                 </div>
             </div>
 
@@ -99,65 +131,66 @@
 </div>
 
 @code {
-    private Usuario usuario = new Usuario();
-    private string confirmarSenha = string.Empty;
-    private string selectedEstadoId = string.Empty;
+    private UsuarioModel usuarioModel = new UsuarioModel();
 
     private List<Estado> listaDeEstados = new();
     private List<Cidade> listaDeCidadesDisponiveis = new();
+    private bool carregandoCidades = false;
 
-    private Dictionary<Guid, List<Cidade>> todasAsCidades = new();
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var rsId = Guid.NewGuid();
-        var scId = Guid.NewGuid();
-        var prId = Guid.NewGuid();
-
-        listaDeEstados = new List<Estado>
-        {
-            new Estado { Id = rsId, Nome = "Rio Grande do Sul", Sigla = "RS" },
-            new Estado { Id = scId, Nome = "Santa Catarina", Sigla = "SC" },
-            new Estado { Id = prId, Nome = "Paraná", Sigla = "PR" }
-        };
-
-        todasAsCidades[rsId] = new List<Cidade>
-        {
-            new Cidade { Id = Guid.NewGuid(), Nome = "Caxias do Sul", EstadoId = rsId },
-            new Cidade { Id = Guid.NewGuid(), Nome = "Porto Alegre", EstadoId = rsId },
-            new Cidade { Id = Guid.NewGuid(), Nome = "Gramado", EstadoId = rsId }
-        };
-        todasAsCidades[scId] = new List<Cidade>
-        {
-            new Cidade { Id = Guid.NewGuid(), Nome = "Florianópolis", EstadoId = scId },
-            new Cidade { Id = Guid.NewGuid(), Nome = "Blumenau", EstadoId = scId }
-        };
-        todasAsCidades[prId] = new List<Cidade>
-        {
-            new Cidade { Id = Guid.NewGuid(), Nome = "Curitiba", EstadoId = prId },
-            new Cidade { Id = Guid.NewGuid(), Nome = "Londrina", EstadoId = prId }
-        };
+        listaDeEstados = await estadoService.GetAllAsync();
     }
 
-    private void HandleEstadoChange(ChangeEventArgs e)
+    private Guid? _selectedEstadoId;
+    private Guid? SelectedEstadoId
     {
-        selectedEstadoId = e.Value.ToString();
-        usuario.Endereco.CidadeId = Guid.Empty;
+        get => _selectedEstadoId;
+        set
+        {
+            if (_selectedEstadoId == value) return;
+            _selectedEstadoId = value;
 
-        if (Guid.TryParse(selectedEstadoId, out var estadoIdGuid))
-        {
-            listaDeCidadesDisponiveis = todasAsCidades.ContainsKey(estadoIdGuid) ? todasAsCidades[estadoIdGuid] : new List<Cidade>();
-        }
-        else
-        {
+            usuarioModel.Endereco.EstadoId = value;
+            usuarioModel.Endereco.CidadeId = null;
             listaDeCidadesDisponiveis.Clear();
+
+            if (_selectedEstadoId.HasValue)
+            {
+                _ = CarregarCidadesDoEstado(_selectedEstadoId.Value);
+            }
+        }
+    }
+
+    private async Task CarregarCidadesDoEstado(Guid estadoId)
+    {
+        carregandoCidades = true;
+        StateHasChanged();
+        try
+        {
+            listaDeCidadesDisponiveis = await cidadeService.ProcurarPorUF(estadoId);
+        }
+        finally
+        {
+            carregandoCidades = false;
+            StateHasChanged();
         }
     }
 
     private async Task CadastrarUsuario()
     {
-        Console.WriteLine("Tentativa de cadastro do usuário: " + usuario.Nome);
-        await Task.CompletedTask;
+        try
+        {
+            var usuarioParaSalvar = UsuarioMapper.ToEntity(usuarioModel, listaDeCidadesDisponiveis);
+
+            await usuarioService.CriarNovoUsuarioAsync(usuarioParaSalvar);
+
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERRO NO CADASTRO: {ex.Message}");
+        }
     }
 
     private void NavegarParaLogin()

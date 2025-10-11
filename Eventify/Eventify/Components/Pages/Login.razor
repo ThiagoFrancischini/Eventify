@@ -5,6 +5,7 @@
 @inject Eventify.Core.Interfaces.Services.IUsuarioService usuarioService
 @inject NavigationManager NavigationManager
 
+@using Eventify.Models
 @using Eventify.Core.Entities
 
 <div class="login-page-wrapper">
@@ -15,21 +16,22 @@
     <div class="login-form-panel">
         <h2 class="welcome-text">BEM VINDO</h2>
 
-        <EditForm Model="Usuario" OnValidSubmit="Autenticar" class="login-form">
-            <div class="form-group mb-3">
+        <EditForm Model="usuarioModel" OnSubmit="Autenticar" class="login-form">
+            <DataAnnotationsValidator /> <div class="form-group mb-3">
                 <div class="input-group">
-                    <InputText class="form-control login-input" @bind-Value="Usuario.Email" placeholder="Email" />
+                    <InputText class="form-control login-input" @bind-Value="usuarioModel.Email" placeholder="Email" />
                 </div>
+                <ValidationMessage For="@(() => usuarioModel.Email)" />
             </div>
 
             <div class="form-group mb-3">
                 <div class="input-group">
-                    <InputText type="@(showPassword ? "text" : "password")"
-                               class="form-control login-input"
-                               @bind-Value="Usuario.Senha"
-                               placeholder="Senha" />
-
+                    <InputText type="password"
+                    class="form-control login-input"
+                    @bind-Value="usuarioModel.Senha"
+                    placeholder="Senha" />
                 </div>
+                <ValidationMessage For="@(() => usuarioModel.Senha)" />
             </div>
 
             <div class="forgot-password-link">
@@ -63,40 +65,54 @@
 </div>
 
 @code {
-    public Usuario Usuario { get; set; } = new Usuario();
+    private UsuarioModel usuarioModel = new UsuarioModel();
+
     private string mensagemErro = string.Empty;
     private bool isLoading = false;
-    private bool showPassword = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var usuarioLogado = Tools.SessionTools.GetUsuarioLogado();
+
+        if(usuarioLogado != null && usuarioLogado.Id != Guid.Empty)
+        {
+            NavigationManager.NavigateTo("/home");
+        } 
+    }
 
     private async Task Autenticar()
     {
         isLoading = true;
         mensagemErro = string.Empty;
+        StateHasChanged();
 
         try
         {
+            if (string.IsNullOrEmpty(usuarioModel.Email) || string.IsNullOrEmpty(usuarioModel.Senha))
+            {
+                throw new ApplicationException("Informe seu email e senha!");
+            }
+
+            var credenciais = new Usuario { Email = usuarioModel.Email, Senha = usuarioModel.Senha };
+            var usuarioAutenticado = await usuarioService.Autenticar(credenciais);
+
+            if (usuarioAutenticado == null)
+            {
+                throw new ApplicationException("Email ou senha inválidos!");
+            }
+
+            Tools.SessionTools.SalvarUsuarioLogado(usuarioAutenticado);
+
             NavigationManager.NavigateTo("/home");
-
-            // // Ajuste aqui conforme seu IUsuarioService.Autenticar espera
-            // var user = await usuarioService.Autenticar(Usuario);
-
-            // if (user.Id != Guid.Empty)
-            // {
-            //     NavigationManager.NavigateTo("/home");
-            // }
-            // else
-            // {
-            //     mensagemErro = "Email ou senha inválidos.";
-            // }
         }
         catch (Exception ex)
         {
-            mensagemErro = "Ocorreu um erro ao tentar fazer login. Tente novamente.";
-            Console.WriteLine($"Erro de login: {ex.Message}");
+            mensagemErro = ex.Message;
         }
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
 

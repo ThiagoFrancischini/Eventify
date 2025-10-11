@@ -53,5 +53,10 @@ namespace Eventify.Infrastructure.Repositories
                 _context.Entry(existingUser).CurrentValues.SetValues(usuario);
             }
         }
+
+        public async Task<Usuario?> Autenticar(string email, string senha)
+        {
+            return await _context.Usuarios.Where(x => x.Email == email && x.Senha == senha).FirstOrDefaultAsync();
+        }
     }
 }

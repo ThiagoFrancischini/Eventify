@@ -22,5 +22,14 @@ namespace Eventify.Core.Services
         {
             return await _unitOfWork.CidadeRepository.GetCidadesPorEstado(estadoId);
         }
+
+        public async Task<Cidade> Salvar(Cidade cidade)
+        {
+            cidade.Id = Guid.NewGuid();
+
+            await _unitOfWork.CidadeRepository.Salvar(cidade);
+
+            return cidade;
+        }
     }
 }

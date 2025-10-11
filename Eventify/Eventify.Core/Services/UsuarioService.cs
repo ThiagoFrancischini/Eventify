@@ -30,7 +30,7 @@ namespace Eventify.Core.Services
 
         public async Task<Usuario> Autenticar(Usuario usuario)
         {
-            return await _unitOfWork.UsuarioRepository.GetById(usuario.Id);
+            return await _unitOfWork.UsuarioRepository.Autenticar(usuario.Email, usuario.Senha);
         }
 
         public async Task<Usuario> CriarNovoUsuarioAsync(Usuario novoUsuario)
@@ -47,6 +47,8 @@ namespace Eventify.Core.Services
             {
                 throw new ApplicationException("Este e-mail já está em uso.");
             }
+
+            novoUsuario.Endereco.Id = Guid.NewGuid();
 
             await _unitOfWork.UsuarioRepository.Salvar(novoUsuario);
 

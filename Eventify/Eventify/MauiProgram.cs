@@ -44,6 +44,8 @@ namespace Eventify
 
             //servicos
             builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+            builder.Services.AddScoped<IEstadoService, EstadoService>();
+            builder.Services.AddScoped<ICidadeService, CidadeService>();
 
 
             //maui
@@ -54,7 +56,19 @@ namespace Eventify
     		builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+            var app = builder.Build();
+
+            using(var scope = app.Services.CreateScope())
+{
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                // RODA TUDO EM UMA THREAD DE BACKGROUND, EVITANDO O DEADLOCK
+                Task.Run(() => Data.DataSeeker.SeedAsync(unitOfWork)).GetAwaiter().GetResult();
+            }
+
+            return app;
         }
     }
 }

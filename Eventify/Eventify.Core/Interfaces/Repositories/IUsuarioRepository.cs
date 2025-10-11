@@ -11,6 +11,7 @@ namespace Eventify.Core.Interfaces.Repositories
     {
         Task<Usuario?> GetById(Guid id);
         Task<Usuario?> GetByEmail(string email);
+        Task<Usuario?> Autenticar(string email, string senha);
         Task Salvar(Usuario usuario);
         Task<List<Usuario>> GetAll();
     }

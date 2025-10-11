@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject NavigationManager NavigationManager
+@using Eventify.Tools
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Eventify</a>
     </div>
@@ -13,5 +16,19 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
+
+        <div class="nav-item px-3">
+            <a class="nav-link" href="#" @onclick="Logout" @onclick:preventDefault>
+                <span class="bi bi-box-arrow-right-nav-menu" aria-hidden="true"></span> Sair
+            </a>
+        </div>
     </nav>
 </div>
+
+@code {
+    private void Logout()
+    {
+        SessionTools.LimparSessao();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}

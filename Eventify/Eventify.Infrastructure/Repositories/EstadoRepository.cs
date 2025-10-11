@@ -20,7 +20,10 @@ namespace Eventify.Infrastructure.Repositories
 
         public async Task<List<Estado>> GetEstados()
         {
-            return await _context.Estados.AsNoTracking().ToListAsync();
+            return await _context
+                .Estados
+                .OrderBy(x => x.Sigla)
+                .ToListAsync();
         }
 
         public async Task<Estado?> GetById(Guid id)
