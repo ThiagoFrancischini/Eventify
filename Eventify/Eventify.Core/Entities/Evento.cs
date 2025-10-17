@@ -10,16 +10,16 @@ namespace Eventify.Core.Entities
     {
         public Guid Id { get; set; }
         public string Titulo { get; set; }
-        public string Descricao { get; set; }
-        public DateTime Data { get; set; }
+        public string ImagemEvento { get; set; }
+        public DateTime DataInicio { get; set; }
+        public DateTime DataTermino { get; set; }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
-        public string MaisSobre { get; set; }
-        public string ImagemEvento { get; set; }
+        public string Descricao { get; set; }
         public string Status { get; set; }
         public string Categoria { get; set; }
         public Guid EnderecoId { get; set; }
         public Endereco Endereco { get; set; }
-        public CategoriaIngresso[] CategoriasIngressos { get; set; }
+        public List<CategoriaIngresso> CategoriasIngressos { get; set; }
     }
 }

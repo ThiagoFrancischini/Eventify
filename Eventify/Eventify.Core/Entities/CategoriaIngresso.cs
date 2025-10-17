@@ -15,6 +15,6 @@ namespace Eventify.Core.Entities
         public int LimiteCompra { get; set; }
         public Guid EventoId { get; set; }
         public Evento Evento { get; set; }
-        public Ingresso[] Ingressos { get; set; }
+        public List<Ingresso> Ingressos { get; set; }
     }
 }

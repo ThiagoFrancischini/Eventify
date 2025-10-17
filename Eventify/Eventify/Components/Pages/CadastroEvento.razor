@@ -1,0 +1,423 @@
+﻿@page "/cadastro-evento"
+@layout Components.Layout.MainLayout
+@inject NavigationManager NavigationManager
+@inject IEventoService eventoService
+@inject IEstadoService estadoService
+@inject ICidadeService cidadeService
+
+@using Eventify.Core.Entities
+@using System.ComponentModel.DataAnnotations
+@using Eventify.Mapping
+@using Eventify.Models
+@using Eventify.Models.Eventify.Models
+
+<div class="register-page-wapper">
+    <div class="register-form-panel">
+        <h2 class="welcome-text">CRIAR EVENTO PRESENCIAL</h2>
+
+        <EditForm Model="@eventoModel" OnValidSubmit="CriarEvento">
+            <DataAnnotationsValidator />
+
+            @* 1. Informações Básicas *@
+            <section class="form-section">
+                <h3>1. Informações Básicas</h3>
+                <p>Adicione as principais informações do evento.</p>
+                <div class="form-grid">
+
+                    @* Nome do Evento (Existente) *@
+                    <div class="form-group form-span-2">
+                        <label>Nome do evento <span class="required-star">*</span></label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Titulo" placeholder="Nome do evento" />
+                        <ValidationMessage For="@(() => eventoModel.Titulo)" />
+                    </div>
+
+                    @* Substituição do Mockup pela lógica de upload real *@
+                    <div class="form-group form-span-2">
+                        <label>Imagem de divulgação <span class="required-star">*</span></label>
+
+                        @if (!string.IsNullOrEmpty(eventoModel.ImagemEvento))
+                        {
+                            <div class="image-preview-container">
+                                <img src="@eventoModel.ImagemEvento" alt="Pré-visualização da Imagem" class="img-fluid" style="max-width: 300px; max-height: 200px; display: block; margin-bottom: 10px;" />
+                                <button type="button" class="btn btn-danger btn-sm" @onclick="RemoverImagem">Remover Imagem</button>
+                            </div>
+                        }
+                        <br />
+
+                        <InputFile OnChange="@HandleFileSelection" accept=".jpg, .jpeg, .png" />
+                        <ValidationMessage For="@(() => eventoModel.ImagemEvento)" />
+                    </div>
+                </div>
+            </section>
+
+            @* 2. Data e Hora *@
+            <section class="form-section">
+                <h3>2. Data e Hora</h3>
+                <p>Informe aos participantes quando seu evento vai acontecer.</p>
+                <div class="form-grid">
+
+                    @* Data de Início *@
+                    <div class="form-group">
+                        <label>Data de Início <span class="required-star">*</span></label>
+                        <InputDate class="form-control" @bind-Value="eventoModel.DataInicio" />
+                        <ValidationMessage For="@(() => eventoModel.DataInicio)" />
+                    </div>
+
+                    @* Hora de Início *@
+                    <div class="form-group">
+                        <label>Hora de Início <span class="required-star">*</span></label>
+                        <InputText type="time" class="form-control" @bind-Value="HoraInicioString" />
+                        <ValidationMessage For="@(() => eventoModel.HoraInicio)" />
+                    </div>
+
+                    @* Data de Término *@
+                    <div class="form-group">
+                        <label>Data de Término <span class="required-star">*</span></label>
+                        <InputDate class="form-control" @bind-Value="eventoModel.DataTermino" />
+                        <ValidationMessage For="@(() => eventoModel.DataTermino)" />
+                    </div>
+
+                    @* Hora de Término *@
+                    <div class="form-group">
+                        <label>Hora de Término <span class="required-star">*</span></label>
+                        <InputText type="time" class="form-control" @bind-Value="HoraFimString" />
+                        <ValidationMessage For="@(() => eventoModel.HoraFim)" />
+                    </div>
+                </div>
+            </section>
+
+            @* 3. Descrição do Evento *@
+            <section class="form-section">
+                <h3>3. Descrição do Evento</h3>
+                <p>Conte todos os detalhes do seu evento, como a programação e os diferenciais da sua produção!</p>
+                <div class="form-grid">
+                    <div class="form-group form-span-2">
+                        <label>Descrição <span class="required-star">*</span></label>
+                        <InputTextArea class="form-control" @bind-Value="eventoModel.Descricao" placeholder="Adicione a descrição do seu evento..." rows="5" />
+                        <ValidationMessage For="@(() => eventoModel.Descricao)" />
+                    </div>
+
+                    @* Adicionei o campo "Categoria" que não está no mockup mas está na classe Evento. *@
+                    <div class="form-group form-span-2">
+                        <label>Categoria do Evento</label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Categoria" placeholder="Ex: Tecnologia, Esporte, Música..." />
+                    </div>
+                </div>
+            </section>
+
+            @* 4. Ingressos *@
+            <section class="form-section">
+                <h3>4. Ingressos</h3>
+                <p>Defina os tipos de ingresso disponíveis.</p>
+
+                @if (eventoModel.CategoriasIngresso.Any())
+                {
+                    @foreach (var categoria in eventoModel.CategoriasIngresso)
+                    {
+                        <div class="form-grid ticket-item-grid">
+                            <h4>
+                                @categoria.Titulo
+                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoverCategoriaIngresso(categoria)" title="Remover Ingresso">
+                                    <span class="bi bi-trash-fill" aria-hidden="true"></span>
+                                </button>
+                            </h4>
+
+                            @* Título/Nome do Ingresso *@
+                            <div class="form-group form-span-2">
+                                <label>Título do Ingresso</label>
+                                <InputText class="form-control" @bind-Value="categoria.Titulo" placeholder="Ex: Lote 1, VIP, Meia-Entrada" />
+                                <ValidationMessage For="@(() => categoria.Titulo)" />
+                            </div>
+
+                            @* Valor *@
+                            <div class="form-group">
+                                <label>Valor (R$)</label>
+                                @* Usamos InputNumber para valores decimais, garantindo validação de tipo *@
+                                <InputNumber class="form-control" @bind-Value="categoria.Valor" step="0.01" />
+                                <ValidationMessage For="@(() => categoria.Valor)" />
+                            </div>
+
+                            @* Limite de Ingressos *@
+                            <div class="form-group">
+                                <label>Limite de Ingressos</label>
+                                <InputNumber class="form-control" @bind-Value="categoria.LimiteCompra" />
+                                <ValidationMessage For="@(() => categoria.LimiteCompra)" />
+                            </div>
+
+                            @* Descrição *@
+                            <div class="form-group form-span-2">
+                                <label>Descrição do Ingresso (Opcional)</label>
+                                <InputTextArea class="form-control" @bind-Value="categoria.Descricao" rows="2" />
+                            </div>
+                        </div>
+                        <hr style="margin: 1.5rem 0;" />
+                    }
+                }
+
+                <div class="form-grid ticket-grid">
+                    <button type="button" class="btn-add-ticket" @onclick="AdicionarCategoriaIngresso">
+                        <span class="plus-icon">+</span> Adicionar Tipo de Ingresso
+                    </button>
+                </div>
+            </section>
+
+            @* 5. Endereço (Cadastro Completo) *@
+            <section class="form-section">
+                <h3>5. Endereço</h3>
+                <p>Preencha os detalhes do local onde o evento será realizado.</p>
+                <div class="form-grid">
+
+                    @* CEP *@
+                    <div class="form-group">
+                        <label>CEP <span class="required-star">*</span></label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Endereco.Cep" placeholder="00000-000" />
+                        <ValidationMessage For="@(() => eventoModel.Endereco.Cep)" />
+                    </div>
+
+                    @* Rua *@
+                    <div class="form-group form-span-2">
+                        <label>Rua/Avenida <span class="required-star">*</span></label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Endereco.Rua" placeholder="Rua de Exemplo" />
+                        <ValidationMessage For="@(() => eventoModel.Endereco.Rua)" />
+                    </div>
+
+                    @* Número *@
+                    <div class="form-group">
+                        <label>Número <span class="required-star">*</span></label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Endereco.Numero" placeholder="1234" />
+                        <ValidationMessage For="@(() => eventoModel.Endereco.Numero)" />
+                    </div>
+
+                    @* Complemento *@
+                    <div class="form-group">
+                        <label>Complemento</label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Endereco.Complemento" placeholder="Apartamento, Bloco" />
+                        <ValidationMessage For="@(() => eventoModel.Endereco.Complemento)" />
+                    </div>
+
+                    @* Bairro *@
+                    <div class="form-group">
+                        <label>Bairro <span class="required-star">*</span></label>
+                        <InputText class="form-control" @bind-Value="eventoModel.Endereco.Bairro" placeholder="Centro" />
+                        <ValidationMessage For="@(() => eventoModel.Endereco.Bairro)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado (UF)</label>
+                        <InputSelect class="form-select" @bind-Value="SelectedEstadoId">
+                            <option value="">Selecione um Estado</option>
+                            @foreach (var estado in listaDeEstados)
+                            {
+                                <option value="@estado.Id">@estado.Sigla</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => eventoModel.Endereco.EstadoId)" />
+                    </div>
+
+                    <div class="form-group form-span-2">
+                        <label>Cidade</label>
+                        <InputSelect class="form-select" @bind-Value="eventoModel.Endereco.CidadeId"
+                                     disabled="@(SelectedEstadoId == null || carregandoCidades)">
+                            @if (carregandoCidades)
+                            {
+                                <option>Carregando cidades...</option>
+                            }
+                            else if (SelectedEstadoId.HasValue)
+                            {
+                                <option value="">Selecione uma Cidade</option>
+                                @foreach (var cidade in listaDeCidadesDisponiveis)
+                                {
+                                    <option value="@cidade.Id">@cidade.Nome</option>
+                                }
+                            }
+                            else
+                            {
+                                <option>Selecione um estado primeiro</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => eventoModel.Endereco.CidadeId)" />
+                    </div>
+                </div>
+            </section>
+
+            @* 6. Responsabilidades *@
+            <section class="form-section">
+                <div class="form-group form-span-2">
+                    <div class="checkbox-container">
+                        <InputCheckbox id="eventoModel.AceiteTermos" @bind-Value="eventoModel.AceiteTermos" />
+                        <label for="eventoModel.AceiteTermos" class="checkbox-label">
+                            Ao publicar este evento, estou de acordo com os <a href="#">Termos de uso</a>, com as <a href="#">Diretrizes de Comunidade</a> e com as <a href="#">Regras de meus anúncios</a>, bem como estou ciente da <a href="#">Política de Privacidade</a> e das <a href="#">Responsabilidades Legais</a>.
+                        </label>
+                        <br />
+                    </div>
+                </div>
+            <ValidationMessage For="@(() => eventoModel.AceiteTermos)" />
+            </section>
+
+
+            @* Botão de Submissão *@
+            <div class="form-group form-span-2 submit-button-group">
+                <button type="submit" class="btn btn-primary-submit">Criar Evento</button>
+            </div>
+
+        </EditForm>
+
+        <div class="footer-mock">
+            UNIVERSIDADE DE CAXIAS DO SUL, 2025
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private bool carregandoCidades = false;
+    private List<Estado> listaDeEstados = new();
+    private List<Cidade> listaDeCidadesDisponiveis = new();
+    private IBrowserFile selectedFile;
+    private const int MaxFileSize = 5 * 1024 * 1024;
+
+    private EventoModel eventoModel = new EventoModel()
+    {
+        DataInicio = DateTime.Now.Date,
+        DataTermino = DateTime.Now.Date,
+        HoraInicio = new TimeSpan(19, 0, 0),
+        HoraFim = new TimeSpan(22, 0, 0)
+    };
+
+    private string HoraInicioString
+    {
+        get => eventoModel.HoraInicio.HasValue ? eventoModel.HoraInicio.Value.ToString(@"hh\:mm") : string.Empty;
+        set
+        {
+            if (TimeSpan.TryParse(value, out var timeSpan))
+            {
+                eventoModel.HoraInicio = timeSpan;
+            }
+        }
+    }
+
+    private string HoraFimString
+    {
+        get => eventoModel.HoraFim.HasValue ? eventoModel.HoraFim.Value.ToString(@"hh\:mm") : string.Empty;
+        set
+        {
+            if (TimeSpan.TryParse(value, out var timeSpan))
+            {
+                eventoModel.HoraFim = timeSpan;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        listaDeEstados = await estadoService.GetAllAsync();
+    }
+
+    private Guid? _selectedEstadoId;
+    private Guid? SelectedEstadoId
+    {
+        get => _selectedEstadoId;
+        set
+        {
+            if (_selectedEstadoId == value) return;
+            _selectedEstadoId = value;
+
+            eventoModel.Endereco.EstadoId = value;
+            eventoModel.Endereco.CidadeId = null;
+            listaDeCidadesDisponiveis.Clear();
+
+            if (_selectedEstadoId.HasValue)
+            {
+                _ = CarregarCidadesDoEstado(_selectedEstadoId.Value);
+            }
+        }
+    }
+
+    private async Task CarregarCidadesDoEstado(Guid estadoId)
+    {
+        carregandoCidades = true;
+        StateHasChanged();
+        try
+        {
+            listaDeCidadesDisponiveis = await cidadeService.ProcurarPorUF(estadoId);
+        }
+        finally
+        {
+            carregandoCidades = false;
+            StateHasChanged();
+        }
+    }
+
+    private void AdicionarCategoriaIngresso()
+    {
+        eventoModel.CategoriasIngresso.Add(new CategoriaIngressoModel()
+        {
+            Titulo = $"Ingresso {eventoModel.CategoriasIngresso.Count + 1}",
+            Valor = 0,
+            LimiteCompra = 50
+        });
+    }
+
+    private void RemoverCategoriaIngresso(CategoriaIngressoModel categoria)
+    {
+        eventoModel.CategoriasIngresso.Remove(categoria);
+    }
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        eventoModel.ImagemEvento = string.Empty;
+
+        if (selectedFile == null) return;
+
+        if (selectedFile.Size > MaxFileSize)
+        {
+            selectedFile = null;
+            return;
+        }
+
+        try
+        {
+            var buffer = new byte[selectedFile.Size];
+            await selectedFile.OpenReadStream(MaxFileSize).ReadAsync(buffer);
+
+            string base64String = Convert.ToBase64String(buffer);
+
+            string mimeType = selectedFile.ContentType;
+            eventoModel.ImagemEvento = $"data:{mimeType};base64,{base64String}";
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar o arquivo: {ex.Message}");
+        }
+    }
+
+    private void RemoverImagem()
+    {
+        eventoModel.ImagemEvento = string.Empty;
+        selectedFile = null;
+    }
+
+    private async Task CriarEvento()
+    {
+        try
+        {
+            var evento = EventoMapper.ToEntity(eventoModel, listaDeCidadesDisponiveis);
+
+            await eventoService.CriarOuAtualizarEventoAsync(evento);
+
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERRO NO CADASTRO: {ex.Message}");
+        }
+    }
+    
+    private void NavegarParaLogin()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
