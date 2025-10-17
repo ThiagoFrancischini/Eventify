@@ -18,20 +18,17 @@
         <EditForm Model="@eventoModel" OnValidSubmit="CriarEvento">
             <DataAnnotationsValidator />
 
-            @* 1. Informações Básicas *@
             <section class="form-section">
                 <h3>1. Informações Básicas</h3>
                 <p>Adicione as principais informações do evento.</p>
                 <div class="form-grid">
 
-                    @* Nome do Evento (Existente) *@
                     <div class="form-group form-span-2">
                         <label>Nome do evento <span class="required-star">*</span></label>
                         <InputText class="form-control" @bind-Value="eventoModel.Titulo" placeholder="Nome do evento" />
                         <ValidationMessage For="@(() => eventoModel.Titulo)" />
                     </div>
 
-                    @* Substituição do Mockup pela lógica de upload real *@
                     <div class="form-group form-span-2">
                         <label>Imagem de divulgação <span class="required-star">*</span></label>
 
@@ -50,34 +47,29 @@
                 </div>
             </section>
 
-            @* 2. Data e Hora *@
             <section class="form-section">
                 <h3>2. Data e Hora</h3>
                 <p>Informe aos participantes quando seu evento vai acontecer.</p>
                 <div class="form-grid">
 
-                    @* Data de Início *@
                     <div class="form-group">
                         <label>Data de Início <span class="required-star">*</span></label>
                         <InputDate class="form-control" @bind-Value="eventoModel.DataInicio" />
                         <ValidationMessage For="@(() => eventoModel.DataInicio)" />
                     </div>
 
-                    @* Hora de Início *@
                     <div class="form-group">
                         <label>Hora de Início <span class="required-star">*</span></label>
                         <InputText type="time" class="form-control" @bind-Value="HoraInicioString" />
                         <ValidationMessage For="@(() => eventoModel.HoraInicio)" />
                     </div>
 
-                    @* Data de Término *@
                     <div class="form-group">
                         <label>Data de Término <span class="required-star">*</span></label>
                         <InputDate class="form-control" @bind-Value="eventoModel.DataTermino" />
                         <ValidationMessage For="@(() => eventoModel.DataTermino)" />
                     </div>
 
-                    @* Hora de Término *@
                     <div class="form-group">
                         <label>Hora de Término <span class="required-star">*</span></label>
                         <InputText type="time" class="form-control" @bind-Value="HoraFimString" />
@@ -86,7 +78,6 @@
                 </div>
             </section>
 
-            @* 3. Descrição do Evento *@
             <section class="form-section">
                 <h3>3. Descrição do Evento</h3>
                 <p>Conte todos os detalhes do seu evento, como a programação e os diferenciais da sua produção!</p>
@@ -97,7 +88,6 @@
                         <ValidationMessage For="@(() => eventoModel.Descricao)" />
                     </div>
 
-                    @* Adicionei o campo "Categoria" que não está no mockup mas está na classe Evento. *@
                     <div class="form-group form-span-2">
                         <label>Categoria do Evento</label>
                         <InputText class="form-control" @bind-Value="eventoModel.Categoria" placeholder="Ex: Tecnologia, Esporte, Música..." />
@@ -105,7 +95,6 @@
                 </div>
             </section>
 
-            @* 4. Ingressos *@
             <section class="form-section">
                 <h3>4. Ingressos</h3>
                 <p>Defina os tipos de ingresso disponíveis.</p>
@@ -122,29 +111,24 @@
                                 </button>
                             </h4>
 
-                            @* Título/Nome do Ingresso *@
                             <div class="form-group form-span-2">
                                 <label>Título do Ingresso</label>
                                 <InputText class="form-control" @bind-Value="categoria.Titulo" placeholder="Ex: Lote 1, VIP, Meia-Entrada" />
                                 <ValidationMessage For="@(() => categoria.Titulo)" />
                             </div>
 
-                            @* Valor *@
                             <div class="form-group">
                                 <label>Valor (R$)</label>
-                                @* Usamos InputNumber para valores decimais, garantindo validação de tipo *@
                                 <InputNumber class="form-control" @bind-Value="categoria.Valor" step="0.01" />
                                 <ValidationMessage For="@(() => categoria.Valor)" />
                             </div>
 
-                            @* Limite de Ingressos *@
                             <div class="form-group">
                                 <label>Limite de Ingressos</label>
                                 <InputNumber class="form-control" @bind-Value="categoria.LimiteCompra" />
                                 <ValidationMessage For="@(() => categoria.LimiteCompra)" />
                             </div>
 
-                            @* Descrição *@
                             <div class="form-group form-span-2">
                                 <label>Descrição do Ingresso (Opcional)</label>
                                 <InputTextArea class="form-control" @bind-Value="categoria.Descricao" rows="2" />
@@ -161,41 +145,35 @@
                 </div>
             </section>
 
-            @* 5. Endereço (Cadastro Completo) *@
             <section class="form-section">
                 <h3>5. Endereço</h3>
                 <p>Preencha os detalhes do local onde o evento será realizado.</p>
                 <div class="form-grid">
 
-                    @* CEP *@
                     <div class="form-group">
                         <label>CEP <span class="required-star">*</span></label>
                         <InputText class="form-control" @bind-Value="eventoModel.Endereco.Cep" placeholder="00000-000" />
                         <ValidationMessage For="@(() => eventoModel.Endereco.Cep)" />
                     </div>
 
-                    @* Rua *@
                     <div class="form-group form-span-2">
                         <label>Rua/Avenida <span class="required-star">*</span></label>
                         <InputText class="form-control" @bind-Value="eventoModel.Endereco.Rua" placeholder="Rua de Exemplo" />
                         <ValidationMessage For="@(() => eventoModel.Endereco.Rua)" />
                     </div>
 
-                    @* Número *@
                     <div class="form-group">
                         <label>Número <span class="required-star">*</span></label>
                         <InputText class="form-control" @bind-Value="eventoModel.Endereco.Numero" placeholder="1234" />
                         <ValidationMessage For="@(() => eventoModel.Endereco.Numero)" />
                     </div>
 
-                    @* Complemento *@
                     <div class="form-group">
                         <label>Complemento</label>
                         <InputText class="form-control" @bind-Value="eventoModel.Endereco.Complemento" placeholder="Apartamento, Bloco" />
                         <ValidationMessage For="@(() => eventoModel.Endereco.Complemento)" />
                     </div>
 
-                    @* Bairro *@
                     <div class="form-group">
                         <label>Bairro <span class="required-star">*</span></label>
                         <InputText class="form-control" @bind-Value="eventoModel.Endereco.Bairro" placeholder="Centro" />
@@ -240,7 +218,6 @@
                 </div>
             </section>
 
-            @* 6. Responsabilidades *@
             <section class="form-section">
                 <div class="form-group form-span-2">
                     <div class="checkbox-container">
@@ -254,17 +231,11 @@
             <ValidationMessage For="@(() => eventoModel.AceiteTermos)" />
             </section>
 
-
-            @* Botão de Submissão *@
             <div class="form-group form-span-2 submit-button-group">
                 <button type="submit" class="btn btn-primary-submit">Criar Evento</button>
             </div>
 
         </EditForm>
-
-        <div class="footer-mock">
-            UNIVERSIDADE DE CAXIAS DO SUL, 2025
-        </div>
     </div>
 </div>
 
