@@ -1,0 +1,250 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa; 
+}
+
+.bi {
+    display: inline-block;
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+    top: -1px;
+    background-size: cover;
+}
+
+.btn .bi {
+    margin: 0;
+    width: 1rem;
+    height: 1rem;
+    top: 0px;
+}
+
+.bi-trash-fill {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-trash-fill' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5m4.5.5a.5.5 0 0 1-.5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5z'/%3E%3C/svg%3E");
+}
+
+
+.register-page-wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh; 
+    align-items: stretch;
+    box-sizing: border-box;
+}
+
+.register-form-panel {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: #fff;
+    padding: 3rem 2rem 5rem 2rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.footer-mock {
+    width: 100%;
+    background-color: #FF8C00;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.8rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+}
+
+.welcome-text {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+}
+
+.register-form {
+    width: 100%;
+    max-width: 800px;
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+    .form-section h3 {
+        font-size: 1.7rem;
+        font-weight: bold;
+        color: #444;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-section p {
+        font-size: 0.95rem;
+        color: #777;
+        margin-bottom: 1.5rem;
+    }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.5rem;
+}
+
+.form-span-2 {
+    grid-column: span 2;
+}
+
+.form-group {
+    text-align: left;
+}
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        display: block;
+        color: #495057;
+    }
+
+    .form-group .form-control, .form-group .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+    }
+
+.required-star {
+    color: #C70039;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.image-upload-mock {
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    margin-top: 5px;
+}
+
+    .image-upload-mock p {
+        margin-top: 0.5rem;
+        color: #666;
+    }
+
+.ticket-grid {
+    grid-template-columns: 2fr 1fr 1.5fr 0.5fr; 
+    align-items: end;
+}
+
+.price-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+    .price-input-wrapper .currency-symbol {
+        margin-right: 5px;
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .price-input-wrapper .form-control {
+        border: none;
+        padding: 0;
+        flex-grow: 1;
+    }
+
+        .price-input-wrapper .form-control:focus {
+            box-shadow: none;
+        }
+
+.btn-add-ticket {
+    background-color: #38C700; 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    height: 50px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+    .btn-add-ticket .plus-icon {
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+
+.btn-google-maps {
+    background-color: #4285F4; 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.checkbox-label {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+    font-weight: normal !important; 
+}
+
+    .checkbox-label a {
+        color: #FF8C00; 
+        text-decoration: none;
+    }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+#aceiteTermos {
+    margin-top: 5px;
+    width: 18px;
+    height: 18px;
+    accent-color: #FF8C00; 
+}
+
+.submit-button-group {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.btn-primary-submit {
+    background-color: #FF8C00;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 3rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+}

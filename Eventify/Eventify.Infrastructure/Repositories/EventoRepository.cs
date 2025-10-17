@@ -57,7 +57,7 @@ namespace Eventify.Infrastructure.Repositories
         {
             return await _context.Eventos
                 .Include(e => e.CategoriasIngressos)
-                .Where(e => e.Data == data)
+                .Where(e => e.DataInicio == data)
                 .ToListAsync();
         }
 

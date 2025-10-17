@@ -46,6 +46,7 @@ namespace Eventify
             builder.Services.AddScoped<IUsuarioService, UsuarioService>();
             builder.Services.AddScoped<IEstadoService, EstadoService>();
             builder.Services.AddScoped<ICidadeService, CidadeService>();
+            builder.Services.AddScoped<IEventoService, EventoService>();
 
 
             //maui
