@@ -195,7 +195,7 @@
                     <div class="form-group form-span-2">
                         <label>Cidade</label>
                         <InputSelect class="form-select" @bind-Value="eventoModel.Endereco.CidadeId"
-                                     disabled="@(SelectedEstadoId == null || carregandoCidades)">
+                        disabled="@(SelectedEstadoId == null || carregandoCidades)">
                             @if (carregandoCidades)
                             {
                                 <option>Carregando cidades...</option>
@@ -228,7 +228,7 @@
                         <br />
                     </div>
                 </div>
-            <ValidationMessage For="@(() => eventoModel.AceiteTermos)" />
+                <ValidationMessage For="@(() => eventoModel.AceiteTermos)" />
             </section>
 
             <div class="form-group form-span-2 submit-button-group">
@@ -246,6 +246,7 @@
     private List<Cidade> listaDeCidadesDisponiveis = new();
     private IBrowserFile selectedFile;
     private const int MaxFileSize = 5 * 1024 * 1024;
+    private Usuario UsuarioLogado = new();
 
     private EventoModel eventoModel = new EventoModel()
     {
@@ -282,6 +283,8 @@
     protected override async Task OnInitializedAsync()
     {
         listaDeEstados = await estadoService.GetAllAsync();
+
+        UsuarioLogado = Tools.SessionTools.GetUsuarioLogado();
     }
 
     private Guid? _selectedEstadoId;
@@ -375,7 +378,9 @@
     {
         try
         {
-            var evento = EventoMapper.ToEntity(eventoModel, listaDeCidadesDisponiveis);
+            Evento evento = EventoMapper.ToEntity(eventoModel, listaDeCidadesDisponiveis);
+
+            evento.UsuarioCriacao = UsuarioLogado;
 
             await eventoService.CriarOuAtualizarEventoAsync(evento);
 

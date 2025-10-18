@@ -21,5 +21,7 @@ namespace Eventify.Core.Entities
         public Guid EnderecoId { get; set; }
         public Endereco Endereco { get; set; }
         public List<CategoriaIngresso> CategoriasIngressos { get; set; }
+        public Guid UsuarioCriacaoId { get; set; }
+        public Usuario UsuarioCriacao { get; set; }
     }
 }

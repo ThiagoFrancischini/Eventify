@@ -87,6 +87,11 @@ namespace Eventify.Infrastructure.Data
                 entity.HasMany(e => e.CategoriasIngressos)
                       .WithOne(c => c.Evento)
                       .HasForeignKey(c => c.EventoId);
+
+                entity.HasOne(i => i.UsuarioCriacao)
+                      .WithMany()
+                      .HasForeignKey(i => i.UsuarioCriacaoId)
+                      .IsRequired();
             });
 
             modelBuilder.Entity<CategoriaIngresso>(entity =>

@@ -27,6 +27,7 @@ namespace Eventify.Infrastructure.Repositories
                     .ThenInclude(c => c.Ingressos)
                 .Include(e => e.Endereco)
                     .ThenInclude(end => end.Cidade)
+                .Include(e => e.UsuarioCriacao)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filtro.Titulo))
@@ -85,7 +86,8 @@ namespace Eventify.Infrastructure.Repositories
         {
             return await _context.Eventos
                 .Include(e => e.CategoriasIngressos)
-                .ThenInclude(c => c.Ingressos)
+                    .ThenInclude(c => c.Ingressos)
+                .Include(e => e.UsuarioCriacao)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
@@ -103,6 +105,7 @@ namespace Eventify.Infrastructure.Repositories
         {
             return await _context.Eventos
                 .Include(e => e.CategoriasIngressos)
+                .Include(e => e.UsuarioCriacao)
                 .Where(e => e.Categoria == categoria)
                 .ToListAsync();
         }
