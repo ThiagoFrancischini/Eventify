@@ -33,5 +33,24 @@ namespace Eventify.Mapping
                 Cidade = cidadeSelecionada
             };
         }
+
+        public static EnderecoModel ToModel(this Endereco entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+
+            return new EnderecoModel
+            {
+                Cep = entity.Cep,
+                Rua = entity.Rua,
+                Bairro = entity.Bairro,
+                Numero = entity.Numero,
+                Complemento = entity.Complemento,
+                CidadeId = entity.CidadeId,
+                EstadoId = entity.Cidade?.EstadoId
+            };
+        }
     }
 }

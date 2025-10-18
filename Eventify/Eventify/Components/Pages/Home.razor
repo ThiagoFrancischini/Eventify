@@ -1,5 +1,106 @@
 ﻿@page "/home"
+@inject NavigationManager NavigationManager
+@inject IEstadoService estadoService
+@inject ICidadeService cidadeService
+@inject IEventoService eventoService
+
+@using Eventify.Models
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+@code{
+    public string FiltroTexto { get; set; } = string.Empty;
+    private List<EventoModel> listaEventosRecomendados = new();
+    private List<EventoModel> listaEventosProximos = new();
+    private List<EventoModel> listaEventosPorDescricao = new();
+
+    private Usuario UsuarioLogado = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        UsuarioLogado = Tools.SessionTools.GetUsuarioLogado() ?? new();
+
+        await BuscarEventosRecomendados();
+
+        await BuscarEventosProximos();
+    }
+
+    private async Task BuscarEventosRecomendados()
+    {
+        try
+        {
+            listaEventosRecomendados = new();
+
+            var eventosRecomendados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
+                {
+                    EstadoId = UsuarioLogado.Endereco.Cidade.EstadoId,
+                    OrderByMaisVendidos = true
+                });
+
+            if (eventosRecomendados != null && eventosRecomendados.Count > 0)
+            {
+                foreach (var item in eventosRecomendados)
+                {
+                    listaEventosRecomendados.Add(Mapping.EventoMapper.ToModel(item));
+                }
+            }
+        }
+        catch
+        {
+            //TRATAR ERRO
+        }
+    }
+
+    private async Task BuscarEventosProximos()
+    {
+        try
+        {
+            listaEventosProximos = new();
+
+            var eventosProximos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
+                {
+                    CidadeId = UsuarioLogado.Endereco.CidadeId,
+                });
+
+            if (eventosProximos != null && eventosProximos.Count > 0)
+            {
+                foreach (var item in eventosProximos)
+                {
+                    listaEventosProximos.Add(Mapping.EventoMapper.ToModel(item));
+                }
+            }
+        }
+        catch
+        {
+            //TRATAR ERRO
+        }
+
+    }
+
+    private async Task FiltrarEvento()
+    {
+        try
+        {
+            listaEventosPorDescricao.Clear();
+
+            var eventosFiltrados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
+                {
+                    Titulo = FiltroTexto,
+                });
+
+            if (eventosFiltrados != null && eventosFiltrados.Count > 0)
+            {
+                foreach (var item in eventosFiltrados)
+                {
+                    listaEventosPorDescricao.Add(Mapping.EventoMapper.ToModel(item));
+                }
+            }
+        }
+        catch
+        {
+            //TRATAR ERRO
+        }
+    }
+}

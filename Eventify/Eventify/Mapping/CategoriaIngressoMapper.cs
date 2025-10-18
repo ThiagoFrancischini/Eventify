@@ -1,4 +1,5 @@
 ﻿using Eventify.Core.Entities;
+using Eventify.Models;
 using Eventify.Models.Eventify.Models;
 
 namespace Eventify.Mapping
@@ -25,6 +26,22 @@ namespace Eventify.Mapping
             }
 
             return models.Select(ToEntity).ToList();
+        }
+
+        public static CategoriaIngressoModel ToModel(this CategoriaIngresso entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+
+            return new CategoriaIngressoModel
+            {
+                Titulo = entity.Titulo,
+                Descricao = entity.Descricao,
+                Valor = entity.Valor,
+                LimiteCompra = entity.LimiteCompra
+            };
         }
     }
 }

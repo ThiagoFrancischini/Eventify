@@ -3,6 +3,7 @@ using Eventify.Models;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Eventify.Models.Eventify.Models;
 
 namespace Eventify.Mapping
 {
@@ -50,6 +51,31 @@ namespace Eventify.Mapping
             };
 
             return eventoEntity;
+        }
+
+        public static EventoModel ToModel(this Evento entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+
+            return new EventoModel
+            {
+                Titulo = entity.Titulo,
+                ImagemEvento = entity.ImagemEvento,
+                DataInicio = entity.DataInicio,
+                HoraInicio = entity.HoraInicio,
+                DataTermino = entity.DataTermino,
+                HoraFim = entity.HoraFim,
+                Descricao = entity.Descricao,
+                Categoria = entity.Categoria,
+
+                Endereco = entity.Endereco.ToModel() ?? new EnderecoModel(),
+                CategoriasIngresso = entity.CategoriasIngressos?
+                    .Select(ci => ci.ToModel())
+                    .ToList() ?? new List<CategoriaIngressoModel>(),
+            };
         }
     }
 }

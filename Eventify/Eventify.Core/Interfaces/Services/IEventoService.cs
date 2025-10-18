@@ -1,4 +1,5 @@
 ﻿using Eventify.Core.Entities;
+using Eventify.Core.Filtros;
 
 namespace Eventify.Core.Interfaces.Services
 {
@@ -6,9 +7,7 @@ namespace Eventify.Core.Interfaces.Services
     {
         Task CriarOuAtualizarEventoAsync(Evento evento);
         Task<Evento?> ObterEventoPorIdAsync(Guid id);
-        Task<List<Evento>> ObterEventosPorCategoriaAsync(string categoria);
-        Task<List<Evento>> ObterEventosPorDataAsync(DateTime data);
-        Task<List<Evento>> ObterTodosEventosAsync();
+        Task<List<Evento>> ObterTodosEventosAsync(FiltroEvento filtro);
         Task RemoverEventoAsync(Guid id);
     }
 }

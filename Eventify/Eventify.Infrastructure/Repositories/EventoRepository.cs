@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Eventify.Core.Entities;
+using Eventify.Core.Filtros;
 using Eventify.Core.Interfaces.Repositories;
 using Eventify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +20,65 @@ namespace Eventify.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<Evento>> GetEventos()
+        public async Task<List<Evento>> GetEventos(FiltroEvento filtro)
         {
-            return await _context.Eventos
+            var query = _context.Eventos
                 .Include(e => e.CategoriasIngressos)
-                .ThenInclude(c => c.Ingressos)
-                .ToListAsync();
+                    .ThenInclude(c => c.Ingressos)
+                .Include(e => e.Endereco)
+                    .ThenInclude(end => end.Cidade)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filtro.Titulo))
+            {
+                query = query.Where(e => e.Titulo.ToUpper().Contains(filtro.Titulo.ToUpper()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtro.Categoria))
+            {
+                query = query.Where(e => e.Categoria == filtro.Categoria);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtro.Status))
+            {
+                query = query.Where(e => e.Status == filtro.Status);
+            }
+
+            if (filtro.EstadoId.HasValue)
+            {
+                query = query.Where(e => e.Endereco != null &&
+                                         e.Endereco.Cidade != null &&
+                                         e.Endereco.Cidade.EstadoId == filtro.EstadoId.Value);
+            }
+
+            if (filtro.CidadeId.HasValue)
+            {
+                query = query.Where(e => e.Endereco != null &&
+                                         e.Endereco.CidadeId == filtro.CidadeId.Value);
+            }
+
+            if (filtro.DataMin.HasValue)
+            {
+                query = query.Where(e => e.DataInicio.Date >= filtro.DataMin.Value.Date);
+            }
+
+            if (filtro.DataMax.HasValue)
+            {
+                query = query.Where(e => e.DataInicio.Date <= filtro.DataMax.Value.Date);
+            }
+
+            if (filtro.OrderByMaisVendidos)
+            {
+                query = query.OrderByDescending(e =>
+                    _context.Ingressos.Count(i => i.EventoId == e.Id)
+                );
+            }
+            else
+            {
+                query = query.OrderBy(e => e.DataInicio);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<Evento?> GetById(Guid id)
@@ -70,6 +124,5 @@ namespace Eventify.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
-
     }
 }

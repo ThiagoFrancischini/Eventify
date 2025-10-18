@@ -1,4 +1,5 @@
 ﻿using Eventify.Core.Entities;
+using Eventify.Core.Filtros;
 using Eventify.Core.Interfaces.Repositories;
 using Eventify.Core.Interfaces.Services;
 
@@ -13,25 +14,14 @@ namespace Eventify.Core.Services
             _eventoRepository = eventoRepository;
         }
 
-        public async Task<List<Evento>> ObterTodosEventosAsync()
+        public async Task<List<Evento>> ObterTodosEventosAsync(FiltroEvento filtro)
         {
-            return await _eventoRepository.GetEventos();
+            return await _eventoRepository.GetEventos(filtro);
         }
 
         public async Task<Evento?> ObterEventoPorIdAsync(Guid id)
         {
             return await _eventoRepository.GetById(id);
-        }
-
-        public async Task<List<Evento>> ObterEventosPorCategoriaAsync(string categoria)
-        {
-            return await _eventoRepository.GetByCategoria(categoria);
-        }
-
-        public async Task<List<Evento>> ObterEventosPorDataAsync(DateTime data)
-        {
-            // Ajuste para considerar apenas a data, se necessário
-            return await _eventoRepository.GetByData(data.Date);
         }
 
         public async Task CriarOuAtualizarEventoAsync(Evento evento)
