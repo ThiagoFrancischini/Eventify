@@ -89,7 +89,7 @@ namespace Eventify.Infrastructure.Data
                       .HasForeignKey(c => c.EventoId);
 
                 entity.HasOne(i => i.UsuarioCriacao)
-                      .WithMany()
+                      .WithMany(c => c.Eventos)
                       .HasForeignKey(i => i.UsuarioCriacaoId)
                       .IsRequired();
             });

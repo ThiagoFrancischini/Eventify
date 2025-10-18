@@ -23,5 +23,6 @@
                 senha = value;
             }
         }
+        public List<Evento> Eventos { get; set; } = new List<Evento>();
     }
 }
