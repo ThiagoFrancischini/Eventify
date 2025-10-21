@@ -380,7 +380,7 @@
         {
             Evento evento = EventoMapper.ToEntity(eventoModel, listaDeCidadesDisponiveis);
 
-            evento.UsuarioCriacao = UsuarioLogado;
+            evento.UsuarioCriacaoId = UsuarioLogado.Id;
 
             await eventoService.CriarOuAtualizarEventoAsync(evento);
 
