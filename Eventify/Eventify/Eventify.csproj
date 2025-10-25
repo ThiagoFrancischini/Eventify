@@ -61,6 +61,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="wwwroot\NovaPasta\**" />
+      <Content Remove="wwwroot\NovaPasta\**" />
+      <EmbeddedResource Remove="wwwroot\NovaPasta\**" />
+      <None Remove="wwwroot\NovaPasta\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Remove="appsettings.json" />
     </ItemGroup>
 
@@ -82,6 +89,10 @@
 
     <ItemGroup>
       <EmbeddedResource Include="appsettings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PRIResource Remove="wwwroot\NovaPasta\**" />
     </ItemGroup>
 
 </Project>

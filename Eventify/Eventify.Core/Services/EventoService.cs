@@ -29,7 +29,7 @@ namespace Eventify.Core.Services
             if (evento.DataTermino < evento.DataInicio)
             {
                 throw new InvalidOperationException("A data de término do evento não pode ser anterior à data de início.");
-            }
+            }            
 
             await _eventoRepository.Salvar(evento);
         }

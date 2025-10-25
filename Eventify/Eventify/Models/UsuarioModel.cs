@@ -14,7 +14,7 @@ namespace Eventify.Models
         public string Nome { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O CPF é obrigatório.")]
-        [StringLength(11, ErrorMessage = "O CPF deve ter 11 caracteres.")]
+        [StringLength(14, ErrorMessage = "CPF Inválido.")]
         public string Cpf { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O email é obrigatório.")]
@@ -26,6 +26,7 @@ namespace Eventify.Models
         public DateTime? Dt_Nascimento { get; set; }
 
         [Required(ErrorMessage = "O número de celular é obrigatório.")]
+        [StringLength(15, MinimumLength = 11, ErrorMessage = "Informe um número válido.")]
         public string Celular { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "A senha é obrigatória.")]

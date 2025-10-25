@@ -1,0 +1,190 @@
+﻿@page "/perfil"
+@layout Components.Layout.MainLayout
+@inject NavigationManager NavigationManager
+@inject IUsuarioService usuarioService
+@inject IEstadoService estadoService
+@inject ICidadeService cidadeService
+
+@using Eventify.Models
+@using Eventify.Core.Entities
+@using Eventify.Mapping
+@using System.Security.Claims
+
+<div class="register-page-wapper">
+    <div class="register-form-panel">
+
+        @if (isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+        }
+        else if (usuario != null)
+        {
+            <section class="form-section">
+                <h3>1. Dados Pessoais</h3>
+                <p>Suas informações de identificação cadastradas.</p>
+
+                <div class="form-grid">
+                    <div class="form-group form-span-2">
+                        <label>Nome Completo</label>
+                        <p class="form-control-static">@usuario.Nome</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <p class="form-control-static">@usuario.Cpf</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data de Nascimento</label>
+                        <p class="form-control-static">@DataNascimentoFormatada</p>
+                    </div>
+
+                    <div class="form-group form-span-2">
+                        <label>Email</label>
+                        <p class="form-control-static">@usuario.Email</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Celular</label>
+                        <p class="form-control-static">@usuario.Celular</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section mt-4">
+                <h3>2. Endereço</h3>
+                <p>Seu local de residência cadastrado.</p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <p class="form-control-static">@usuario.Endereco.Cep</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado (UF)</label>
+                        <p class="form-control-static">@nomeEstado</p>
+                    </div>
+
+                    <div class="form-group form-span-2">
+                        <label>Cidade</label>
+                        <p class="form-control-static">@nomeCidade</p>
+                    </div>
+
+                    <div class="form-group form-span-2">
+                        <label>Rua</label>
+                        <p class="form-control-static">@usuario.Endereco.Rua</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bairro</label>
+                        <p class="form-control-static">@usuario.Endereco.Bairro</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Número</label>
+                        <p class="form-control-static">@usuario.Endereco.Numero</p>
+                    </div>
+
+                    <div class="form-group form-span-2">
+                        <label>Complemento</label>
+                        <p class="form-control-static">@ComplementoFormatado</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section mt-4 mb-20">
+                <h3>3. Segurança</h3>
+                <p>Informações de acesso da sua conta.</p>
+                <div class="form-grid">
+                    <div class="form-group form-span-2">
+                        <label>Senha</label>
+                        <p class="form-control-static">********</p>
+                    </div>
+                </div>
+            </section>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">
+                Não foi possível carregar os dados do seu perfil. Tente novamente mais tarde.
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private UsuarioModel usuario = new UsuarioModel();
+    private bool isLoading = true;
+    private string nomeEstado = "Carregando...";
+    private string nomeCidade = "Carregando...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        try
+        {
+            var usuarioLogadoEntity = Tools.SessionTools.GetUsuarioLogado();
+            if (usuarioLogadoEntity == null)
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            var usuarioEntityCompleto = await usuarioService.GetByIdAsync(usuarioLogadoEntity.Id);
+            if (usuarioEntityCompleto == null)
+            {
+                throw new Exception("Usuário não encontrado no banco de dados.");
+            }
+
+            usuario = UsuarioMapper.ToModel(usuarioEntityCompleto);
+
+            if (usuario.Endereco?.EstadoId.HasValue == true)
+            {
+                var estado = await estadoService.GetByIdAsync(usuario.Endereco.EstadoId.Value);
+                nomeEstado = estado?.Sigla ?? "Não informado";
+
+                if (usuario.Endereco?.CidadeId.HasValue == true)
+                {
+                    var cidadesDoEstado = await cidadeService.ProcurarPorUF(usuario.Endereco.EstadoId.Value);
+                    var cidade = cidadesDoEstado.FirstOrDefault(c => c.Id == usuario.Endereco.CidadeId.Value);
+                    nomeCidade = cidade?.Nome ?? "Não informada";
+                }
+                else
+                {
+                    nomeCidade = "Não informada";
+                }
+            }
+            else
+            {
+                nomeEstado = "Não informado";
+                nomeCidade = "Não informada";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar perfil: {ex.Message}");
+            usuario = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string DataNascimentoFormatada =>
+        usuario.Dt_Nascimento?.ToString("dd/MM/yyyy") ?? "Não informada";
+
+    private string ComplementoFormatado =>
+        string.IsNullOrWhiteSpace(usuario.Endereco?.Complemento) ? "Nenhum" : usuario.Endereco.Complemento;
+
+    private void NavegarParaEditarPerfil()
+    {
+        NavigationManager.NavigateTo("/perfil/editar");
+    }
+}

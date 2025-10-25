@@ -4,6 +4,7 @@
 @inject IEventoService eventoService
 @inject IEstadoService estadoService
 @inject ICidadeService cidadeService
+@inject IJSRuntime JS
 
 @using Eventify.Core.Entities
 @using System.ComponentModel.DataAnnotations
@@ -152,7 +153,7 @@
 
                     <div class="form-group">
                         <label>CEP <span class="required-star">*</span></label>
-                        <InputText class="form-control" @bind-Value="eventoModel.Endereco.Cep" placeholder="00000-000" />
+                        <InputText id="cep" class="form-control" @bind-Value="eventoModel.Endereco.Cep" placeholder="00000-000" />
                         <ValidationMessage For="@(() => eventoModel.Endereco.Cep)" />
                     </div>
 
@@ -255,6 +256,14 @@
         HoraInicio = new TimeSpan(19, 0, 0),
         HoraFim = new TimeSpan(22, 0, 0)
     };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        /*if (firstRender)
+        {
+            await JS.InvokeVoidAsync("aplicarMascaras");
+        }*/
+    }
 
     private string HoraInicioString
     {
@@ -380,7 +389,7 @@
         {
             Evento evento = EventoMapper.ToEntity(eventoModel, listaDeCidadesDisponiveis);
 
-            evento.UsuarioCriacao = UsuarioLogado;
+            evento.UsuarioCriacaoId = UsuarioLogado.Id;
 
             await eventoService.CriarOuAtualizarEventoAsync(evento);
 

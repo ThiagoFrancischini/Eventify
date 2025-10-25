@@ -4,6 +4,7 @@
 @inject IEstadoService estadoService
 @inject ICidadeService cidadeService
 @inject IUsuarioService usuarioService
+@inject IJSRuntime JS
 
 @using Eventify.Models
 @using Eventify.Mapping
@@ -28,7 +29,7 @@
                 </div>
                 <div class="form-group">
                     <label>CPF</label>
-                    <InputText class="form-control" @bind-Value="usuarioModel.Cpf" />
+                    <InputText id="cpf" class="form-control" @bind-Value="usuarioModel.Cpf" />
                     <ValidationMessage For="@(() => usuarioModel.Cpf)" />
                 </div>
                 <div class="form-group">
@@ -38,7 +39,7 @@
                 </div>
                 <div class="form-group">
                     <label>Celular</label>
-                    <InputText class="form-control" @bind-Value="usuarioModel.Celular" />
+                    <InputText id="celular" class="form-control" @bind-Value="usuarioModel.Celular" />
                     <ValidationMessage For="@(() => usuarioModel.Celular)" />
                 </div>
                 <div class="form-group form-span-2">
@@ -59,7 +60,7 @@
 
                 <div class="form-group">
                     <label>CEP</label>
-                    <InputText class="form-control" @bind-Value="usuarioModel.Endereco.Cep" />
+                    <InputText id="cep" class="form-control" @bind-Value="usuarioModel.Endereco.Cep" />
                     <ValidationMessage For="@(() => usuarioModel.Endereco.Cep)" />
                 </div>
 
@@ -142,6 +143,14 @@
         listaDeEstados = await estadoService.GetAllAsync();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("aplicarMascaras");
+        }
+    }
+    
     private Guid? _selectedEstadoId;
     private Guid? SelectedEstadoId
     {
@@ -197,4 +206,5 @@
     {
         NavigationManager.NavigateTo("/");
     }
+
 }

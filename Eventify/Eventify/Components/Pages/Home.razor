@@ -4,18 +4,81 @@
 @inject ICidadeService cidadeService
 @inject IEventoService eventoService
 
-@using Eventify.Models
+@using Eventify.Models 
 
-<h1>Hello, world!</h1>
+<div class="home-container">
 
-Welcome to your new app.
+    <div class="search-bar-container">
+        <span class="oi oi-magnifying-glass search-icon" aria-hidden="true"></span>
+        <input type="text"
+        class="search-input"
+        placeholder="Digite sua localização ou evento de interesse"
+        @bind-value="FiltroTexto"
+        @onkeyup="HandleKeyup" />
+        <button class="search-button" @onclick="ExecutarPesquisa">></button>
+    </div>
+
+    @if (IsBusy)
+    {
+        <p>Carregando...</p>
+    }
+    else{
+        <h2 class="section-title">Próximos eventos</h2>
+
+        @if (listaEventosProximos == null || !listaEventosProximos.Any())
+        {
+            <p>Nenhum evento encontrado.</p>
+        }
+        else
+        {
+            <div class="events-grid">
+                @foreach (var evento in listaEventosProximos)
+                {
+                    <div class="event-card">
+                        <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                        <div class="card-content">
+                            <h3 class="card-title">@evento.Titulo</h3>
+                            <p class="card-location">@evento.Endereco.CidadeNome</p>
+                            <p class="card-date">@evento.DataInicio</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <h2 class="section-title">Recomendados</h2>
+
+        @if (listaEventosRecomendados == null || !listaEventosRecomendados.Any())
+        {
+            <p>Nenhum evento recomendado encontrado.</p>
+        }
+        else
+        {
+            <div class="events-grid">
+                @foreach (var evento in listaEventosRecomendados)
+                {
+                    <div class="event-card">
+                        <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                        <div class="card-content">
+                            <h3 class="card-title">@evento.Titulo</h3>
+                            <p class="card-location">@evento.Endereco.CidadeNome</p>
+                            <p class="card-date">@evento.DataInicio</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
 
 @code{
-    public string FiltroTexto { get; set; } = string.Empty;
+    private string FiltroTexto { get; set; } = string.Empty;
     private List<EventoModel> listaEventosRecomendados = new();
     private List<EventoModel> listaEventosProximos = new();
     private List<EventoModel> listaEventosPorDescricao = new();
+    private bool IsBusy { get; set; }
     private Usuario UsuarioLogado = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -30,11 +93,13 @@ Welcome to your new app.
     {
         try
         {
+            IsBusy = true;
+
             listaEventosRecomendados = new();
 
             var eventosRecomendados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
                 {
-                    EstadoId = UsuarioLogado.Endereco.Cidade.EstadoId,
+                //EstadoId = UsuarioLogado.Endereco.Cidade.EstadoId,
                     OrderByMaisVendidos = true
                 });
 
@@ -50,18 +115,24 @@ Welcome to your new app.
         {
             //TRATAR ERRO
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private async Task BuscarEventosProximos()
     {
         try
         {
+            IsBusy = true;
+
             listaEventosProximos = new();
 
             var eventosProximos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
-                {
-                    CidadeId = UsuarioLogado.Endereco.CidadeId,
-                });
+            {
+                //CidadeId = UsuarioLogado.Endereco.CidadeId,
+            });
 
             if (eventosProximos != null && eventosProximos.Count > 0)
             {
@@ -75,31 +146,72 @@ Welcome to your new app.
         {
             //TRATAR ERRO
         }
-
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
-    private async Task FiltrarEvento()
+    private async Task HandleKeyup(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await ExecutarPesquisa();
+        }
+    }
+
+    private async Task ExecutarPesquisa()
     {
         try
         {
-            listaEventosPorDescricao.Clear();
+            IsBusy = true;
 
-            var eventosFiltrados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
+            if (string.IsNullOrWhiteSpace(FiltroTexto))
+            {
+                await BuscarEventosRecomendados();
+                await BuscarEventosProximos();
+                return;
+            }
+
+            listaEventosProximos = new();
+            var eventosProximos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
                 {
+                //CidadeId = UsuarioLogado.Endereco.CidadeId,
                     Titulo = FiltroTexto,
                 });
 
-            if (eventosFiltrados != null && eventosFiltrados.Count > 0)
+            if (eventosProximos != null && eventosProximos.Count > 0)
             {
-                foreach (var item in eventosFiltrados)
+                foreach (var item in eventosProximos)
                 {
-                    listaEventosPorDescricao.Add(Mapping.EventoMapper.ToModel(item));
+                    listaEventosProximos.Add(Mapping.EventoMapper.ToModel(item));
+                }
+            }
+
+            listaEventosRecomendados = new();
+            var eventosRecomendados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
+                {
+                //EstadoId = UsuarioLogado.Endereco.Cidade.EstadoId,
+                    OrderByMaisVendidos = true,
+                    Titulo = FiltroTexto,
+                });
+
+            if (eventosRecomendados != null && eventosRecomendados.Count > 0)
+            {
+                foreach (var item in eventosRecomendados)
+                {
+                    listaEventosRecomendados.Add(Mapping.EventoMapper.ToModel(item));
                 }
             }
         }
         catch
         {
             //TRATAR ERRO
+        }
+        finally
+        {
+            IsBusy = false;
+            StateHasChanged();
         }
     }
 }

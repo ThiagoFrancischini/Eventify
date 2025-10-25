@@ -23,9 +23,12 @@ namespace Eventify.Mapping
                 throw new InvalidOperationException("A cidade selecionada é inválida.");
             }
 
+            // Remover formatação do CEP
+            var cepLimpo = model.Cep?.Replace("-", "").Trim();
+
             return new Endereco
             {
-                Cep = model.Cep,
+                Cep = cepLimpo,
                 Rua = model.Rua,
                 Bairro = model.Bairro,
                 Numero = model.Numero,
@@ -41,6 +44,9 @@ namespace Eventify.Mapping
                 return null;
             }
 
+            // Remover formatação do CEP
+            entity.Cep =String.IsNullOrWhiteSpace( entity.Cep) ? entity.Cep : entity.Cep.Replace("-", "").Trim();
+
             return new EnderecoModel
             {
                 Cep = entity.Cep,
@@ -49,6 +55,7 @@ namespace Eventify.Mapping
                 Numero = entity.Numero,
                 Complemento = entity.Complemento,
                 CidadeId = entity.CidadeId,
+                CidadeNome = entity.Cidade?.Nome,
                 EstadoId = entity.Cidade?.EstadoId
             };
         }

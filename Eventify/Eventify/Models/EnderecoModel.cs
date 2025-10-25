@@ -5,7 +5,7 @@ namespace Eventify.Models
     public class EnderecoModel
     {
         [Required(ErrorMessage = "O CEP é obrigatório.")]
-        [StringLength(8, ErrorMessage = "O CEP deve ter 8 caracteres.")]
+        [StringLength(9, ErrorMessage = "O CEP deve ter 8 caracteres.")]
         public string Cep { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Selecione um Estado.")]
@@ -13,6 +13,8 @@ namespace Eventify.Models
 
         [Required(ErrorMessage = "Selecione uma Cidade.")]
         public Guid? CidadeId { get; set; }
+
+        public string? CidadeNome { get; set; }
 
         [Required(ErrorMessage = "O nome da rua é obrigatório.")]
         [StringLength(200, ErrorMessage = "A rua não pode ter mais de 200 caracteres.")]

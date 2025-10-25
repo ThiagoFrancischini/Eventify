@@ -1,0 +1,36 @@
+.search-bar-container {
+    display: flex; /* Alinha o input e o botão lado a lado */
+    align-items: center;
+    background-color: #fff;
+    border-radius: 25px;
+    padding: 5px 15px;
+    margin: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-icon {
+    margin-right: 10px;
+    color: #888;
+}
+
+.search-input {
+    flex-grow: 1; /* Faz o input ocupar o espaço disponível */
+    border: none;
+    outline: none;
+    font-size: 1rem;
+}
+
+.search-button {
+    border: none;
+    background-color: #e91e63; /* Cor rosa/vermelha do seu menu */
+    color: white;
+    border-radius: 20px;
+    padding: 8px 15px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .search-button:hover {
+        background-color: #c2185b; /* Um tom mais escuro para o hover */
+    }
