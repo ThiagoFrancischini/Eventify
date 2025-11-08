@@ -3,6 +3,7 @@ using Eventify.Core.Interfaces.Services;
 using Eventify.Core.Services;
 using Eventify.Infrastructure.Data;
 using Eventify.Infrastructure.Repositories;
+using Eventify.Models.States;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -48,6 +49,9 @@ namespace Eventify
             builder.Services.AddScoped<ICidadeService, CidadeService>();
             builder.Services.AddScoped<IEventoService, EventoService>();
 
+
+            //states
+            builder.Services.AddSingleton<PedidoStateService>();
 
             //maui
             builder.Services.AddMauiBlazorWebView();

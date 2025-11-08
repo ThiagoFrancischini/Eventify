@@ -1,0 +1,273 @@
+﻿@page "/pagamento"
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject Models.States.PedidoStateService PedidoService
+
+<div class="payment-container p-3">
+    <h3>Pagamento</h3>
+
+    <div class="payment-tabs mb-4">
+        <button class="tab-button @(TipoPagamento == enTipoPagamento.Pix ? "active" : "")"
+        @onclick="() => MudarTipoPagamento(enTipoPagamento.Pix)">
+            PIX
+        </button>
+        <button class="tab-button @(TipoPagamento == enTipoPagamento.Cartao ? "active" : "")"
+        @onclick="() => MudarTipoPagamento(enTipoPagamento.Cartao)">
+            Cartão de Crédito
+        </button>
+    </div>
+
+    @if (TipoPagamento == enTipoPagamento.Pix)
+    {
+        <div class="pix-container text-center">
+
+            @if (pagamentoConfirmadoPix)
+            {
+                <div class="pix-success-message">
+                    <h4 class="text-success">Pagamento Confirmado!</h4>
+                    <p>Seu ingresso foi enviado por e-mail!</p>
+                    <button class="btn btn-outline-secondary" @onclick="NavegarParaIngressos">
+                        Meus Ingressos
+                    </button>
+                </div>
+            }
+            else if (estaCarregandoPix)
+            {
+                <div class="pix-loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Confirmando pagamento, aguarde...</p>
+                </div>
+            }
+            else
+            {
+                <h4>Total a pagar: R$ @valorIng.ToString("n2")</h4>
+                <p class="mb-2">Escaneie o QR Code abaixo com seu app do banco:</p>
+
+                <div class="qr-code-placeholder mb-3" id="qrcode-container">
+                </div>
+
+                <p>Ou use o PIX Copia e Cola:</p>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" value="@pixStringFixo" readonly />
+                    <button class="btn btn-outline-secondary" type="button">Copiar</button>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-2" @onclick="SimularPagamentoPix">
+                    Simular Confirmação de Pagamento
+                </button>
+            }
+        </div>
+    }
+    else if (TipoPagamento == enTipoPagamento.Cartao)
+    {
+        @if (pagamentoConfirmadoCartao)
+        {
+            <div class="pix-success-message text-center">
+                <h4 class="text-success">Pagamento Confirmado!</h4>
+                <p>Seu ingresso foi enviado por e-mail!</p>
+                <button class="btn btn-outline-secondary" @onclick="NavegarParaIngressos">
+                    Meus Ingressos
+                </button>
+            </div>
+        }
+        else if (estaCarregandoCartao)
+        {
+            <div class="pix-loading text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Processando pagamento, aguarde...</p>
+            </div>
+        }
+        else
+        {
+            <div class="card-container">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Nome no Cartão</label>
+                        <input type="text" class="form-control" placeholder="Como impresso no cartão" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número do Cartão</label>
+                        <input type="tel" class="form-control" placeholder="0000 0000 0000 0000" id="cartao-numero" />
+                    </div>
+                    <div class="row">
+                        <div class="col-7 mb-3">
+                            <label class="form-label">Validade (MM/AA)</label>
+                            <input type="text" class="form-control" placeholder="MM/AA" id="cartao-validade" />
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label class="form-label">CVV</label>
+                            <input type="tel" class="form-control" placeholder="123" id="cartao-cvv" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Parcelas</label>
+                        <select class="form-select">
+                            <option value="1">1x de R$ 120,00</option>
+                            <option value="2">2x de R$ 60,00</option>
+                            <option value="3">3x de R$ 40,00</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 mt-2" @onclick="SimularPagamentoCartao">
+                        Confirmar Pagamento
+                    </button>
+                </form>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .payment-tabs {
+    display: flex;
+    border-bottom: 1px solid #dee2e6;
+    }
+
+    .tab-button {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #007bff;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    }
+
+    .tab-button.active {
+    border-bottom-color: #007bff;
+    font-weight: bold;
+    color: #0056b3;
+    }
+
+    .qr-code-placeholder {
+    width: 220px;
+    height: 220px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px auto;
+    border-radius: 8px;
+    }
+
+    #qrcode-container img, #qrcode-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 10px;
+    box-sizing: border-box;
+    }
+
+    .pix-loading, .pix-success-message {
+    padding: 40px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    }
+</style>
+
+@code {
+    enum enTipoPagamento
+    {
+        Pix = 0,
+        Cartao = 1
+    }
+
+    private enTipoPagamento TipoPagamento;
+    private string pixStringFixo = "00020126340014br.gov.bcb.pix0112123123123123520400005303986540115802BR5905Teste6006Cidade62110507123123163046CC5";
+
+    private bool estaCarregandoPix = false;
+    private bool pagamentoConfirmadoPix = false;
+
+    private bool estaCarregandoCartao = false;
+    private bool pagamentoConfirmadoCartao = false;
+
+    private object ingresso;
+    private double valorIng;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        TipoPagamento = enTipoPagamento.Pix;
+
+        ingresso = PedidoService.IngressoAtual;
+
+        if (ingresso == null )
+        {
+            // await Task.Delay(1500);
+            // NavigationManager.NavigateTo("/home");
+
+            valorIng = 200.50;
+        }
+        else
+        {
+            TipoPagamento = enTipoPagamento.Pix;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TipoPagamento == enTipoPagamento.Pix)
+        {
+            await JS.InvokeVoidAsync("gerarQRCode", "qrcode-container", pixStringFixo);
+        }
+    }
+
+    private void NavegarParaIngressos()
+    {
+        NavigationManager.NavigateTo("/home");
+    }
+
+    private async Task MudarTipoPagamento(enTipoPagamento novoTipo)
+    {
+        if (TipoPagamento == novoTipo) return;
+
+        if (novoTipo == enTipoPagamento.Cartao)
+        {
+            estaCarregandoPix = false;
+            pagamentoConfirmadoPix = false;
+        }
+        else if (novoTipo == enTipoPagamento.Pix)
+        {
+            estaCarregandoCartao = false;
+            pagamentoConfirmadoCartao = false;
+        }
+
+        TipoPagamento = novoTipo;
+        await Task.Yield();
+
+        if (TipoPagamento == enTipoPagamento.Cartao)
+        {
+            await JS.InvokeVoidAsync("ativarMascarasPagamento");
+        }
+        else if (TipoPagamento == enTipoPagamento.Pix)
+        {
+            await JS.InvokeVoidAsync("gerarQRCode", "qrcode-container", pixStringFixo);
+        }
+    }
+
+    private async Task SimularPagamentoPix()
+    {
+        estaCarregandoPix = true;
+        StateHasChanged();
+        await Task.Delay(1250);
+        estaCarregandoPix = false;
+        pagamentoConfirmadoPix = true;
+        StateHasChanged();
+    }
+
+    private async Task SimularPagamentoCartao()
+    {
+        estaCarregandoCartao = true;
+        StateHasChanged();
+        await Task.Delay(1250);
+        estaCarregandoCartao = false;
+        pagamentoConfirmadoCartao = true;
+        StateHasChanged();
+    }
+}

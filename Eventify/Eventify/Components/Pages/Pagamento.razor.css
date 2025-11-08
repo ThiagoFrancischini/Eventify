@@ -1,0 +1,49 @@
+﻿.payment-tabs
+{
+    display: flex;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #007bff;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+}
+
+.tab-button.active {
+    border-bottom-color: #007bff;
+    font-weight: bold;
+    color: #0056b3;
+}
+
+.qr-code-placeholder {
+    width: 220px;
+    height: 220px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px auto;
+    border-radius: 8px;
+}
+
+#qrcode-container img, #qrcode-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.pix-loading, .pix-success-message {
+    padding: 40px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; /* Garante altura mínima */
+}
