@@ -33,6 +33,11 @@ namespace Eventify.Core.Services
             return await _unitOfWork.UsuarioRepository.Autenticar(usuario.Email, usuario.Senha);
         }
 
+        public async Task Update(Usuario usuario)
+        {
+            await _unitOfWork.UsuarioRepository.Salvar(usuario);
+        }
+
         public async Task<Usuario> CriarNovoUsuarioAsync(Usuario novoUsuario)
         {
             if (novoUsuario?.Endereco == null)

@@ -4,6 +4,7 @@
 @inject IEventoService eventoService
 @inject IEstadoService estadoService
 @inject ICidadeService cidadeService
+@inject INotificationService NotificationService
 @inject IJSRuntime JS
 
 @using Eventify.Core.Entities
@@ -393,11 +394,14 @@
 
             await eventoService.CriarOuAtualizarEventoAsync(evento);
 
+            NotificationService.ShowSuccess("Evento cadastrado com sucesso!");
+
             NavigationManager.NavigateTo("/");
+
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERRO NO CADASTRO: {ex.Message}");
+            NotificationService.ShowError("Falha ao cadastrar o evento. Tente novamente.");
         }
     }
     

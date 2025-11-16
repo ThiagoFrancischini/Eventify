@@ -21,6 +21,7 @@ namespace Eventify.Mapping
 
             var usuarioEntity = new Usuario
             {
+                Id = model.Id,
                 Nome = model.Nome,
                 Cpf = cpfLimpo,
                 Email = model.Email,
@@ -43,6 +44,7 @@ namespace Eventify.Mapping
 
             return new UsuarioModel
             {
+                Id = entity.Id,
                 Nome = entity.Nome,
                 Email = entity.Email,
                 // Converte a data de UTC (do banco) para Local (para exibição na tela)

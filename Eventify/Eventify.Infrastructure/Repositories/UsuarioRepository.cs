@@ -40,18 +40,32 @@ namespace Eventify.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task Salvar(Usuario usuario)
+        public async Task Salvar(Usuario usuario) 
         {
-            var existingUser = await _context.Usuarios.FindAsync(usuario.Id);
+            var existingUser = await _context.Usuarios
+                .Include(u => u.Endereco)
+                .FirstOrDefaultAsync(u => u.Id == usuario.Id);
 
             if (existingUser == null)
             {
                 await _context.Usuarios.AddAsync(usuario);
             }
+
             else
             {
                 _context.Entry(existingUser).CurrentValues.SetValues(usuario);
+
+                if (existingUser.Endereco != null && usuario.Endereco != null)
+                {
+                    _context.Entry(existingUser.Endereco).CurrentValues.SetValues(usuario.Endereco);
+                }
+                else if (existingUser.Endereco == null && usuario.Endereco != null)
+                {
+                    existingUser.Endereco = usuario.Endereco;
+                }
             }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Usuario?> Autenticar(string email, string senha)
