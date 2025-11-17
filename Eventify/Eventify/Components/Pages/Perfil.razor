@@ -4,14 +4,19 @@
 @inject IUsuarioService usuarioService
 @inject IEstadoService estadoService
 @inject ICidadeService cidadeService
+@inject INotificationService NotificationService
 
 @using Eventify.Models
 @using Eventify.Core.Entities
 @using Eventify.Mapping
 @using System.Security.Claims
+@using System.ComponentModel.DataAnnotations
 
 <div class="register-page-wapper">
     <div class="register-form-panel">
+
+        <h2 class="welcome-text">EDITAR PERFIL</h2>
+        <br />
 
         @if (isLoading)
         {
@@ -23,90 +28,141 @@
         }
         else if (usuario != null)
         {
-            <section class="form-section">
-                <h3>1. Dados Pessoais</h3>
-                <p>Suas informações de identificação cadastradas.</p>
+            <EditForm Model="@usuario" OnSubmit="UpdatePerfil">
+                <DataAnnotationsValidator /> @* Adicionado: Necessário para validação *@
 
-                <div class="form-grid">
-                    <div class="form-group form-span-2">
-                        <label>Nome Completo</label>
-                        <p class="form-control-static">@usuario.Nome</p>
+                @* 1. Dados Pessoais *@
+                <section class="form-section">
+                    <h3>1. Dados Pessoais</h3>
+                    <p>Suas informações de identificação cadastradas.</p>
+
+                    <div class="form-grid">
+                        <div class="form-group form-span-2">
+                            <label>Nome Completo</label>
+                            <InputText @bind-Value="usuario.Nome" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Nome)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>CPF</label>
+                            @* CPF geralmente não é editável após o cadastro *@
+                            <InputText @bind-Value="usuario.Cpf" class="form-control" disabled /> 
+                            <ValidationMessage For="@(() => usuario.Cpf)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Data de Nascimento</label>
+                            @* Data de Nascimento agora é editável *@
+                            <InputDate @bind-Value="usuario.Dt_Nascimento" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Dt_Nascimento)" />
+                        </div>
+
+                        <div class="form-group form-span-2">
+                            <label>Email</label>
+                            <InputText @bind-Value="usuario.Email" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Email)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Celular</label>
+                            <InputText @bind-Value="usuario.Celular" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Celular)" />
+                        </div>
                     </div>
+                </section>
 
-                    <div class="form-group">
-                        <label>CPF</label>
-                        <p class="form-control-static">@usuario.Cpf</p>
+                @* 2. Endereço (Tornando editável com InputSelect e InputText) *@
+                <section class="form-section mt-4">
+                    <h3>2. Endereço</h3>
+                    <p>Seu local de residência cadastrado.</p>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>CEP</label>
+                            <InputText @bind-Value="usuario.Endereco.Cep" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Endereco.Cep)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estado (UF)</label>
+                            <InputSelect class="form-select" @bind-Value="SelectedEstadoId">
+                                <option value="">Selecione um Estado</option>
+                                @foreach (var estado in listaDeEstados)
+                                {
+                                    <option value="@estado.Id">@estado.Sigla</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => usuario.Endereco.EstadoId)" />
+                        </div>
+
+                        <div class="form-group form-span-2">
+                            <label>Cidade</label>
+                            <InputSelect class="form-select" @bind-Value="usuario.Endereco.CidadeId" 
+                                disabled="@(!SelectedEstadoId.HasValue || carregandoCidades)">
+                                @if (carregandoCidades)
+                                {
+                                    <option>Carregando cidades...</option>
+                                }
+                                else if (SelectedEstadoId.HasValue)
+                                {
+                                    <option value="">Selecione uma Cidade</option>
+                                    @foreach (var cidade in listaDeCidadesDisponiveis)
+                                    {
+                                        <option value="@cidade.Id">@cidade.Nome</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option>Selecione um estado primeiro</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => usuario.Endereco.CidadeId)" />
+                        </div>
+
+                        <div class="form-group form-span-2">
+                            <label>Rua</label>
+                            <InputText @bind-Value="usuario.Endereco.Rua" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Endereco.Rua)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Bairro</label>
+                            <InputText @bind-Value="usuario.Endereco.Bairro" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Endereco.Bairro)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Número</label>
+                            <InputText @bind-Value="usuario.Endereco.Numero" class="form-control" />
+                            <ValidationMessage For="@(() => usuario.Endereco.Numero)" />
+                        </div>
+
+                        <div class="form-group form-span-2">
+                            <label>Complemento</label>
+                            <InputText @bind-Value="usuario.Endereco.Complemento" class="form-control" placeholder="Opcional" />
+                            <ValidationMessage For="@(() => usuario.Endereco.Complemento)" />
+                        </div>
                     </div>
+                </section>
 
-                    <div class="form-group">
-                        <label>Data de Nascimento</label>
-                        <p class="form-control-static">@DataNascimentoFormatada</p>
+                <section class="form-section mt-4 mb-20">
+                    <h3>3. Segurança</h3>
+                    <p>Você pode alterar sua senha em uma seção separada para maior segurança.</p>
+                    <div class="form-grid">
+                        <div class="form-group form-span-2">
+                            <label>Senha</label>
+                            <p class="form-control-static">********</p>
+                            <button type="button" class="btn btn-sm btn-link" @onclick="() => { /* Implementar lógica de modal/navegação para trocar senha */ }">Alterar Senha</button>
+                        </div>
                     </div>
+                </section>
 
-                    <div class="form-group form-span-2">
-                        <label>Email</label>
-                        <p class="form-control-static">@usuario.Email</p>
+                <section class="form-section mt-4 mb-20">
+                    <div class="form-group form-span-2 submit-button-group">
+                        <button type="submit" class="btn btn-primary-submit">Salvar Informações</button>
                     </div>
-
-                    <div class="form-group">
-                        <label>Celular</label>
-                        <p class="form-control-static">@usuario.Celular</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="form-section mt-4">
-                <h3>2. Endereço</h3>
-                <p>Seu local de residência cadastrado.</p>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>CEP</label>
-                        <p class="form-control-static">@usuario.Endereco.Cep</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Estado (UF)</label>
-                        <p class="form-control-static">@nomeEstado</p>
-                    </div>
-
-                    <div class="form-group form-span-2">
-                        <label>Cidade</label>
-                        <p class="form-control-static">@nomeCidade</p>
-                    </div>
-
-                    <div class="form-group form-span-2">
-                        <label>Rua</label>
-                        <p class="form-control-static">@usuario.Endereco.Rua</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Bairro</label>
-                        <p class="form-control-static">@usuario.Endereco.Bairro</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Número</label>
-                        <p class="form-control-static">@usuario.Endereco.Numero</p>
-                    </div>
-
-                    <div class="form-group form-span-2">
-                        <label>Complemento</label>
-                        <p class="form-control-static">@ComplementoFormatado</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="form-section mt-4 mb-20">
-                <h3>3. Segurança</h3>
-                <p>Informações de acesso da sua conta.</p>
-                <div class="form-grid">
-                    <div class="form-group form-span-2">
-                        <label>Senha</label>
-                        <p class="form-control-static">********</p>
-                    </div>
-                </div>
-            </section>
+                </section>
+            </EditForm>
         }
         else
         {
@@ -120,8 +176,12 @@
 @code {
     private UsuarioModel usuario = new UsuarioModel();
     private bool isLoading = true;
-    private string nomeEstado = "Carregando...";
-    private string nomeCidade = "Carregando...";
+    private bool carregandoCidades = false;
+    private List<Estado> listaDeEstados = new();
+    private List<Cidade> listaDeCidadesDisponiveis = new();
+
+    private string DataNascimentoFormatada => usuario.Dt_Nascimento?.ToString("dd/MM/yyyy") ?? "Não informada";
+    private string ComplementoFormatado => string.IsNullOrWhiteSpace(usuario.Endereco?.Complemento) ? "Nenhum" : usuario.Endereco.Complemento;
 
     protected override async Task OnInitializedAsync()
     {
@@ -129,6 +189,8 @@
 
         try
         {
+            listaDeEstados = await estadoService.GetAllAsync();
+
             var usuarioLogadoEntity = Tools.SessionTools.GetUsuarioLogado();
             if (usuarioLogadoEntity == null)
             {
@@ -144,26 +206,11 @@
 
             usuario = UsuarioMapper.ToModel(usuarioEntityCompleto);
 
-            if (usuario.Endereco?.EstadoId.HasValue == true)
-            {
-                var estado = await estadoService.GetByIdAsync(usuario.Endereco.EstadoId.Value);
-                nomeEstado = estado?.Sigla ?? "Não informado";
+            _selectedEstadoId = usuario.Endereco?.EstadoId;
 
-                if (usuario.Endereco?.CidadeId.HasValue == true)
-                {
-                    var cidadesDoEstado = await cidadeService.ProcurarPorUF(usuario.Endereco.EstadoId.Value);
-                    var cidade = cidadesDoEstado.FirstOrDefault(c => c.Id == usuario.Endereco.CidadeId.Value);
-                    nomeCidade = cidade?.Nome ?? "Não informada";
-                }
-                else
-                {
-                    nomeCidade = "Não informada";
-                }
-            }
-            else
+            if (_selectedEstadoId.HasValue)
             {
-                nomeEstado = "Não informado";
-                nomeCidade = "Não informada";
+                await CarregarCidadesDoEstado(_selectedEstadoId.Value);
             }
         }
         catch (Exception ex)
@@ -177,14 +224,54 @@
         }
     }
 
-    private string DataNascimentoFormatada =>
-        usuario.Dt_Nascimento?.ToString("dd/MM/yyyy") ?? "Não informada";
-
-    private string ComplementoFormatado =>
-        string.IsNullOrWhiteSpace(usuario.Endereco?.Complemento) ? "Nenhum" : usuario.Endereco.Complemento;
-
-    private void NavegarParaEditarPerfil()
+    private Guid? _selectedEstadoId;
+    private Guid? SelectedEstadoId
     {
-        NavigationManager.NavigateTo("/perfil/editar");
+        get => _selectedEstadoId;
+        set
+        {
+            if (_selectedEstadoId == value) return;
+            _selectedEstadoId = value;
+
+            usuario.Endereco.EstadoId = value;
+            usuario.Endereco.CidadeId = null; 
+            listaDeCidadesDisponiveis.Clear();
+
+            if (_selectedEstadoId.HasValue)
+            {
+                _ = CarregarCidadesDoEstado(_selectedEstadoId.Value);
+            }
+        }
+    }
+
+    private async Task CarregarCidadesDoEstado(Guid estadoId)
+    {
+        carregandoCidades = true;
+        StateHasChanged();
+        try
+        {
+            listaDeCidadesDisponiveis = await cidadeService.ProcurarPorUF(estadoId);
+        }
+        finally
+        {
+            carregandoCidades = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdatePerfil()
+    {
+        try
+        {
+            var usuarioEntity = UsuarioMapper.ToEntity(usuario, listaDeCidadesDisponiveis); 
+            
+            await usuarioService.Update(usuarioEntity);
+            NotificationService.ShowSuccess("Perfil atualizado com sucesso!");
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Falha ao atualizar o perfil. Tente novamente.");
+        }
     }
 }

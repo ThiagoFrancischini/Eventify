@@ -1,0 +1,47 @@
+﻿@using Eventify.Core.Entities.Eventify.Services.Notifications
+@implements IDisposable
+@inject INotificationService NotificationService
+
+<div class="snackbar-container @VisibilityClass">
+    <div class="snackbar-content @CurrentMessage.CssClass">
+        @CurrentMessage.Message
+    </div>
+</div>
+
+@code {
+    private NotificationMessage CurrentMessage { get; set; } = new NotificationMessage("", "");
+    private string VisibilityClass => IsVisible ? "show" : "hide";
+    private bool IsVisible { get; set; } = false;
+    private System.Timers.Timer Timer;
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnShow += ShowSnackbar;
+    }
+
+    private void ShowSnackbar(NotificationMessage message)
+    {
+        CurrentMessage = message;
+        IsVisible = true;
+
+        Timer = new System.Timers.Timer(message.Duration.TotalMilliseconds);
+        Timer.Elapsed += HideSnackbar;
+        Timer.AutoReset = false;
+        Timer.Start();
+
+        StateHasChanged();
+    }
+
+    private void HideSnackbar(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        IsVisible = false;
+        Timer.Dispose();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnShow -= ShowSnackbar;
+        Timer?.Dispose();
+    }
+}

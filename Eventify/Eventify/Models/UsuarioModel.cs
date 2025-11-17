@@ -9,6 +9,8 @@ namespace Eventify.Models
 {
     public class UsuarioModel
     {
+        public Guid Id { get; set; }
+
         [Required(ErrorMessage = "O nome completo é obrigatório.")]
         [StringLength(150, MinimumLength = 3, ErrorMessage = "O nome deve ter entre 3 e 150 caracteres.")]
         public string Nome { get; set; } = string.Empty;

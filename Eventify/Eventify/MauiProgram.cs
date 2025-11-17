@@ -48,6 +48,7 @@ namespace Eventify
             builder.Services.AddScoped<IEstadoService, EstadoService>();
             builder.Services.AddScoped<ICidadeService, CidadeService>();
             builder.Services.AddScoped<IEventoService, EventoService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
             //states
