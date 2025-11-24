@@ -9,8 +9,9 @@ namespace Eventify.Core.Interfaces.Repositories
 {
     public interface ICategoriasIngressoRepository
     {
-        Task<List<CategoriaIngresso>> GetCategoriasIngresso();
         Task<CategoriaIngresso?> GetById(Guid id);
+        Task<List<CategoriaIngresso>> GetAll();
+        Task<List<CategoriaIngresso>> GetByEvent(Guid eventoId);
         Task Salvar(CategoriaIngresso categoria);
         Task Remover(Guid id);
     }

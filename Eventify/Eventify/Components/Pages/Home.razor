@@ -34,7 +34,7 @@
             <div class="events-grid">
                 @foreach (var evento in listaEventosProximos)
                 {
-                    <div class="event-card">
+                    <div class="event-card" @onclick="() => NavegarParaDetalhes(evento.Id)">
                         <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
                         <div class="card-content">
                             <h3 class="card-title">@evento.Titulo</h3>
@@ -87,6 +87,18 @@
         await BuscarEventosRecomendados();
 
         await BuscarEventosProximos();
+    }
+
+    private void NavegarParaDetalhes(Guid eventoId)
+    {
+        try
+        {
+            NavigationManager.NavigateTo($"/evento/{eventoId}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 
     private async Task BuscarEventosRecomendados()

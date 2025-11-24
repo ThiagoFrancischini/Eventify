@@ -1,4 +1,4 @@
-﻿using Eventify.Models.Eventify.Models;
+﻿using Eventify.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -42,5 +42,7 @@ namespace Eventify.Models
 
         [Range(typeof(bool), "true", "true", ErrorMessage = "Você deve aceitar os termos de responsabilidade para criar o evento.")]
         public bool AceiteTermos { get; set; } = false;
+
+        public Guid Id { get; set; }
     }
 }

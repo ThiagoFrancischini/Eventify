@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Eventify.Core.Entities;
+﻿using Eventify.Core.Entities;
 using Eventify.Core.Interfaces.Repositories;
 using Eventify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -19,28 +14,43 @@ namespace Eventify.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<CategoriaIngresso>> GetCategoriasIngresso()
-        {
-            return await _context.CategoriasIngresso
-                .Include(c => c.Ingressos)
-                .ToListAsync();
-        }
-
         public async Task<CategoriaIngresso?> GetById(Guid id)
         {
             return await _context.CategoriasIngresso
+                .Include(c => c.Evento)
                 .Include(c => c.Ingressos)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
+        public async Task<List<CategoriaIngresso>> GetAll()
+        {
+            return await _context.CategoriasIngresso
+                .Include(c => c.Evento)
+                .Include(c => c.Ingressos)
+                .ToListAsync();
+        }
+
+        public async Task<List<CategoriaIngresso>> GetByEvent(Guid eventoId)
+        {
+            return await _context.CategoriasIngresso
+                .Include(c => c.Evento)
+                .Include(c => c.Ingressos)
+                .Where(c => c.EventoId == eventoId)
+                .ToListAsync();
+        }
+
         public async Task Salvar(CategoriaIngresso categoria)
         {
-            if (_context.CategoriasIngresso.Any(c => c.Id == categoria.Id))
-                _context.CategoriasIngresso.Update(categoria);
-            else
-                _context.CategoriasIngresso.Add(categoria);
+            var categoriaExistente = await _context.CategoriasIngresso.FindAsync(categoria.Id);
 
-            await _context.SaveChangesAsync();
+            if (categoriaExistente == null)
+            {
+                await _context.CategoriasIngresso.AddAsync(categoria);
+            }
+            else
+            {
+                _context.Entry(categoriaExistente).CurrentValues.SetValues(categoria);
+            }
         }
 
         public async Task Remover(Guid id)
@@ -49,7 +59,6 @@ namespace Eventify.Infrastructure.Repositories
             if (categoria != null)
             {
                 _context.CategoriasIngresso.Remove(categoria);
-                await _context.SaveChangesAsync();
             }
         }
     }

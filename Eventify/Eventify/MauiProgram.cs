@@ -1,13 +1,15 @@
-﻿using Eventify.Core.Interfaces.Repositories;
+﻿using System.Reflection;
+using Eventify.Core.Interfaces;
+using Eventify.Core.Interfaces.Repositories;
 using Eventify.Core.Interfaces.Services;
 using Eventify.Core.Services;
 using Eventify.Infrastructure.Data;
 using Eventify.Infrastructure.Repositories;
 using Eventify.Models.States;
+using Eventify.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 
 namespace Eventify
 {
@@ -48,7 +50,9 @@ namespace Eventify
             builder.Services.AddScoped<IEstadoService, EstadoService>();
             builder.Services.AddScoped<ICidadeService, CidadeService>();
             builder.Services.AddScoped<IEventoService, EventoService>();
+            builder.Services.AddScoped<IIngressoService, IngressoService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<ICategoriasIngressoService, CategoriasIngressoService>();
 
 
             //states
