@@ -1,6 +1,6 @@
 ﻿using Eventify.Core.Entities;
 using Eventify.Models;
-using Eventify.Models.Eventify.Models;
+using Eventify.Models;
 
 namespace Eventify.Mapping
 {

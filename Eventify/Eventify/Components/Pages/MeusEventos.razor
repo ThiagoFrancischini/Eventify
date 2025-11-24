@@ -1,0 +1,293 @@
+@page "/meus-eventos"
+@inject NavigationManager NavigationManager
+@inject IEventoService eventoService
+@inject IUsuarioService usuarioService
+
+@using Eventify.Models
+@using Eventify.Core.Interfaces
+
+<div class="meus-eventos-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="btn-back" @onclick="VoltarParaHome">
+                    <span class="oi oi-arrow-left"></span>
+                </button>
+                <div>
+                    <h1 class="page-title">Meus Eventos</h1>
+                    <p class="page-subtitle">Gerencie todos os seus eventos criados</p>
+                </div>
+            </div>
+            <button class="btn-criar-evento" @onclick="CriarNovoEvento">
+                <span class="oi oi-plus"></span>
+                <span>Criar Evento</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="page-content">
+        @if (IsBusy)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>Carregando seus eventos...</p>
+            </div>
+        }
+        else if (ListaEventos == null || !ListaEventos.Any())
+        {
+            <div class="empty-state">
+                <span class="empty-icon">??</span>
+                <h2>Nenhum evento criado</h2>
+                <p>Você ainda não criou nenhum evento. Comece agora mesmo!</p>
+                <button class="btn-primary" @onclick="CriarNovoEvento">
+                    <span class="oi oi-plus"></span>
+                    Criar Meu Primeiro Evento
+                </button>
+            </div>
+        }
+        else
+        {
+            <!-- Filtros e Pesquisa -->
+            <div class="filtros-section">
+                <div class="search-box">
+                    <span class="oi oi-magnifying-glass search-icon"></span>
+                    <input type="text" 
+                           class="search-input" 
+                           placeholder="Buscar eventos..."
+                           @bind-value="TextoPesquisa"
+                           @oninput="FiltrarEventos" />
+                </div>
+
+                <div class="filtros-buttons">
+                    <button class="filtro-btn @(FiltroAtual == "todos" ? "active" : "")" 
+                            @onclick='() => AplicarFiltro("todos")'>
+                        Todos (@ListaEventos.Count)
+                    </button>
+                    <button class="filtro-btn @(FiltroAtual == "proximos" ? "active" : "")" 
+                            @onclick='() => AplicarFiltro("proximos")'>
+                        Próximos (@EventosProximos.Count)
+                    </button>
+                    <button class="filtro-btn @(FiltroAtual == "passados" ? "active" : "")" 
+                            @onclick='() => AplicarFiltro("passados")'>
+                        Passados (@EventosPassados.Count)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de Eventos -->
+            <div class="eventos-grid">
+                @foreach (var evento in EventosFiltrados)
+                {
+                    <div class="evento-card">
+                        <!-- Imagem com Badge de Status -->
+                        <div class="evento-imagem-wrapper">
+                            <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="evento-imagem" />
+                            <div class="evento-status-badge @GetStatusClass(evento)">
+                                @GetStatusTexto(evento)
+                            </div>
+                        </div>
+
+                        <!-- Conteúdo do Card -->
+                        <div class="evento-card-content">
+                            <h3 class="evento-titulo">@evento.Titulo</h3>
+                            
+                            <div class="evento-info-items">
+                                <div class="info-item">
+                                    <span class="oi oi-calendar"></span>
+                                    <span>@evento.DataInicio?.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="oi oi-clock"></span>
+                                    <span>@evento.HoraInicio?.ToString(@"hh\:mm")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="oi oi-location-pin"></span>
+                                    <span>@evento.Endereco?.CidadeNome</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="oi oi-tag"></span>
+                                    <span>@evento.Categoria</span>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="evento-actions">
+                                <button class="btn-action btn-view" @onclick="() => VisualizarEvento(evento.Id)">
+                                    <span class="oi oi-eye"></span>
+                                    <span>Visualizar</span>
+                                </button>
+                                <button class="btn-action btn-edit" @onclick="() => EditarEvento(evento.Id)">
+                                    <span class="oi oi-pencil"></span>
+                                    <span>Editar</span>
+                                </button>
+                                <button class="btn-action btn-stats" @onclick="() => VerEstatisticas(evento.Id)">
+                                    <span class="oi oi-bar-chart"></span>
+                                    <span>Stats</span>
+                                </button>
+                                <button class="btn-action btn-delete" @onclick="() => ConfirmarExclusao(evento.Id)">
+                                    <span class="oi oi-trash"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+
+    }
+</div>
+
+
+
+@code {
+    private Usuario? UsuarioLogado { get; set; }
+    private List<EventoModel> ListaEventos { get; set; } = new();
+    private List<EventoModel> EventosFiltrados { get; set; } = new();
+    private List<EventoModel> EventosProximos => ListaEventos.Where(e => e.DataInicio >= DateTime.Now).ToList();
+    private List<EventoModel> EventosPassados => ListaEventos.Where(e => e.DataInicio < DateTime.Now).ToList();
+    
+    private string TextoPesquisa { get; set; } = string.Empty;
+    private string FiltroAtual { get; set; } = "todos";
+    private bool IsBusy { get; set; }
+    
+    private bool MostrarModalExclusao { get; set; }
+    private Guid EventoIdParaExcluir { get; set; }
+    private bool ExcluindoEvento { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            UsuarioLogado = Tools.SessionTools.GetUsuarioLogado();
+            
+            if (UsuarioLogado != null)
+            {
+                await CarregarEventos();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao inicializar: {ex.Message}");
+        }
+    }
+
+    private async Task CarregarEventos()
+    {
+        try
+        {
+            IsBusy = true;
+
+            var eventos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
+            {
+                // Filtrar por organizador se necessário
+                // OrganizadorId = UsuarioLogado.Id
+            });
+
+            if (eventos != null && eventos.Any())
+            {
+                ListaEventos = eventos.Select(e => Mapping.EventoMapper.ToModel(e)).ToList();
+                EventosFiltrados = ListaEventos;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar eventos: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void FiltrarEventos(ChangeEventArgs e)
+    {
+        TextoPesquisa = e.Value?.ToString() ?? string.Empty;
+        AplicarFiltros();
+    }
+
+    private void AplicarFiltro(string filtro)
+    {
+        FiltroAtual = filtro;
+        AplicarFiltros();
+    }
+
+    private void AplicarFiltros()
+    {
+        var eventosFiltrados = ListaEventos.AsEnumerable();
+
+        // Filtro por status
+        eventosFiltrados = FiltroAtual switch
+        {
+            "proximos" => EventosProximos,
+            "passados" => EventosPassados,
+            _ => ListaEventos
+        };
+
+        // Filtro por texto de pesquisa
+        if (!string.IsNullOrWhiteSpace(TextoPesquisa))
+        {
+            eventosFiltrados = eventosFiltrados.Where(e => 
+                e.Titulo.Contains(TextoPesquisa, StringComparison.OrdinalIgnoreCase) ||
+                e.Categoria.Contains(TextoPesquisa, StringComparison.OrdinalIgnoreCase) ||
+                (e.Endereco?.CidadeNome ?? "").Contains(TextoPesquisa, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        EventosFiltrados = eventosFiltrados.ToList();
+    }
+
+    private string GetStatusClass(EventoModel evento)
+    {
+        return evento.DataInicio >= DateTime.Now ? "status-proximo" : "status-passado";
+    }
+
+    private string GetStatusTexto(EventoModel evento)
+    {
+        return evento.DataInicio >= DateTime.Now ? "Próximo" : "Encerrado";
+    }
+
+    private int ObterLimiteIngressos(EventoModel evento)
+    {
+        return evento.CategoriasIngresso?.Sum(c => c.LimiteCompra) ?? 0;
+    }
+
+    private void VisualizarEvento(Guid eventoId)
+    {
+        NavigationManager.NavigateTo($"/evento/{eventoId}");
+    }
+
+    private void EditarEvento(Guid eventoId)
+    {
+        NavigationManager.NavigateTo($"/editar-evento/{eventoId}");
+    }
+
+    private void VerEstatisticas(Guid eventoId)
+    {
+        NavigationManager.NavigateTo($"/estatisticas-evento/{eventoId}");
+    }
+
+    private void ConfirmarExclusao(Guid eventoId)
+    {
+        EventoIdParaExcluir = eventoId;
+        MostrarModalExclusao = true;
+    }
+
+    private void CriarNovoEvento()
+    {
+        NavigationManager.NavigateTo("/criar-evento");
+    }
+
+    private void VoltarParaHome()
+    {
+        NavigationManager.NavigateTo("/home");
+    }
+
+    private void IrParaLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}

@@ -1,69 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Eventify.Core.Entities;
+﻿using Eventify.Core.Entities;
 using Eventify.Core.Interfaces.Repositories;
 using Eventify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Infrastructure.Repositories
 {
-
     public class IngressoRepository : IIngressoRepository
-        {
+    {
         private readonly EventifyDbContext _context;
 
-            public IngressoRepository(EventifyDbContext context)
+        public IngressoRepository(EventifyDbContext context)
         {
             _context = context;
-        }
-
-        public async Task<List<Ingresso>> GetIngressos()
-        {
-            return await _context.Ingressos
-                .Include(i => i.CategoriaIngresso)
-                .Include(i => i.Evento)
-                .Include(i => i.UsuarioCompra)
-                .ToListAsync();
         }
 
         public async Task<Ingresso?> GetById(Guid id)
         {
             return await _context.Ingressos
-                .Include(i => i.CategoriaIngresso)
                 .Include(i => i.Evento)
                 .Include(i => i.UsuarioCompra)
+                .Include(i => i.CategoriaIngresso)
                 .FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        public async Task<List<Ingresso>> GetAll()
+        {
+            return await _context.Ingressos
+                .Include(i => i.Evento)
+                .Include(i => i.UsuarioCompra)
+                .Include(i => i.CategoriaIngresso)
+                .ToListAsync();
+        }
+
+        public async Task<List<Ingresso>> GetByEvent(Guid eventoId)
+        {
+            return await _context.Ingressos
+                .Include(i => i.Evento)
+                .Include(i => i.UsuarioCompra)
+                .Include(i => i.CategoriaIngresso)
+                .Where(i => i.EventoId == eventoId)
+                .ToListAsync();
+        }
+
+        public async Task<List<Ingresso>> GetByUser(Guid usuarioId)
+        {
+            return await _context.Ingressos
+                .Include(i => i.Evento)
+                .Include(i => i.UsuarioCompra)
+                .Include(i => i.CategoriaIngresso)
+                .Where(i => i.UsuarioCompraId == usuarioId)
+                .ToListAsync();
+        }
+
+        public async Task<List<Ingresso>> GetByCategory(Guid categoriaId)
+        {
+            return await _context.Ingressos
+                .Include(i => i.Evento)
+                .Include(i => i.UsuarioCompra)
+                .Include(i => i.CategoriaIngresso)
+                .Where(i => i.CategoriaIngressoId == categoriaId)
+                .ToListAsync();
         }
 
         public async Task Salvar(Ingresso ingresso)
         {
-            if (_context.Ingressos.Any(i => i.Id == ingresso.Id))
-                _context.Ingressos.Update(ingresso);
+            var ingressoExistente = await _context.Ingressos.FindAsync(ingresso.Id);
+
+            if (ingressoExistente == null)
+            {
+                await _context.Ingressos.AddAsync(ingresso);
+            }
             else
-                _context.Ingressos.Add(ingresso);
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<Ingresso?> GetByCodigo(string codigo)
-        {
-            return await _context.Ingressos
-                .Include(i => i.CategoriaIngresso)
-                .Include(i => i.Evento)
-                .Include(i => i.UsuarioCompra)
-                .FirstOrDefaultAsync(i => i.Codigo == codigo);
-        }
-
-        public async Task<List<Ingresso>> GetByUsuario(Guid usuarioId)
-        {
-            return await _context.Ingressos
-                .Include(i => i.CategoriaIngresso)
-                .Include(i => i.Evento)
-                .Where(i => i.UsuarioCompraId == usuarioId)
-                .ToListAsync();
+            {
+                _context.Entry(ingressoExistente).CurrentValues.SetValues(ingresso);
+            }
         }
 
         public async Task Remover(Guid id)
@@ -72,7 +82,6 @@ namespace Eventify.Infrastructure.Repositories
             if (ingresso != null)
             {
                 _context.Ingressos.Remove(ingresso);
-                await _context.SaveChangesAsync();
             }
         }
     }

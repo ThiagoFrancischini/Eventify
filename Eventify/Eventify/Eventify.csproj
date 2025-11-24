@@ -95,4 +95,9 @@
       <PRIResource Remove="wwwroot\NovaPasta\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Components\Pages\DetalhesEvento.css" />
+      <None Remove="Components\Pages\StyleSheet1.css" />
+    </ItemGroup>
+
 </Project>

@@ -3,7 +3,7 @@ using Eventify.Models;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Eventify.Models.Eventify.Models;
+using Eventify.Models;
 
 namespace Eventify.Mapping
 {
@@ -70,6 +70,7 @@ namespace Eventify.Mapping
                 HoraFim = entity.HoraFim,
                 Descricao = entity.Descricao,
                 Categoria = entity.Categoria,
+                Id = entity.Id,
 
                 Endereco = entity.Endereco.ToModel() ?? new EnderecoModel(),
                 CategoriasIngresso = entity.CategoriasIngressos?
