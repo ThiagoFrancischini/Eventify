@@ -16,5 +16,6 @@ namespace Eventify.Core.Filtros
         public DateTime? DataMin { get; set; }
         public DateTime? DataMax { get; set; }
         public bool OrderByMaisVendidos { get; set; } = false;
+        public Guid UsuarioCriacaoId { get; set; }
     }
 }
