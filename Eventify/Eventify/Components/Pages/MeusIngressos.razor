@@ -1,0 +1,190 @@
+﻿@page "/meus-ingressos"
+@layout Components.Layout.MainLayout
+@inject NavigationManager NavigationManager
+@inject IIngressoService ingressoService
+@inject INotificationService NotificationService
+@inject IJSRuntime JS
+
+@using Eventify.Core.Entities
+@using Eventify.Core.Filtros
+@using Eventify.Mapping
+@using Eventify.Models
+
+<div class="register-page-wapper">
+    <div class="register-form-panel" style="width: 100%; max-width: 100%;">
+        <h2 class="welcome-text">MEUS INGRESSOS</h2>
+
+        @if (carregando)
+        {
+            <div class="loading-state">
+                <p>Buscando seus ingressos...</p>
+            </div>
+        }
+        else if (listaIngressosModel == null || !listaIngressosModel.Any())
+        {
+            <div class="empty-state">
+                <p>Você ainda não comprou nenhum ingresso.</p>
+            </div>
+        }
+        else
+        {
+            <div class="ticket-list">
+                @foreach (var ingresso in listaIngressosModel)
+                {
+                    <div class="ticket-card-item">
+
+                        <div class="ticket-preview">
+                            @if (!string.IsNullOrEmpty(ingresso.Evento?.ImagemEvento))
+                            {
+                                <img src="@ingresso.Evento.ImagemEvento" alt="@ingresso.EventoTitulo" />
+                            }
+                            else
+                            {
+                                <div class="no-image">Sem Imagem</div>
+                            }
+                        </div>
+
+                        <div class="ticket-details">
+                            <h4 class="event-title">@ingresso.EventoTitulo</h4>
+
+                            <p class="ticket-info-row">
+                                <i class="bi bi-calendar-event"></i>
+                                <span>@ingresso.Evento?.DataInicio?.ToString("dd/MM/yyyy") às @ingresso.Evento?.HoraInicio?.ToString(@"hh\:mm")</span>
+                            </p>
+
+                            <p class="ticket-info-row">
+                                <i class="bi bi-geo-alt"></i>
+                                <span>@ingresso.Evento?.Endereco?.CidadeNome</span>
+                            </p>
+
+                            <div class="ticket-badge">
+                                <span class="badge-category">@ingresso.CategoriaNome</span>
+                                <span class="badge-code">#@ingresso.Codigo</span>
+                            </div>
+                        </div>
+
+                        <div class="ticket-actions">
+                            @if (ingresso.Valido && !ingresso.Usado && ingresso.Evento?.DataInicio > DateTime.Now)
+                            {
+                                <button class="btn-action btn-refund" @onclick="() => ConfirmarReembolso(ingresso)">
+                                    Reembolsar
+                                </button>
+                            }
+                            else if (ingresso.Valido && !ingresso.Usado && ingresso.Evento?.DataInicio?.Date == DateTime.Now.Date)
+                            {
+                                <button class="btn-action btn-use" @onclick="() => UtilizarIngresso(ingresso)">
+                                    Utilizar
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-action btn-disabled" disabled>
+                                    @(ingresso.Usado ? "Já Utilizado" : "Inválido/Expirado")
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@if (mostrarModalUtilizacao && ingressoSelecionado != null)
+{
+    <div class="modal-backdrop">
+        <div class="modal-content">
+            <h3>Apresente este ingresso</h3>
+            <p>@ingressoSelecionado.EventoTitulo</p>
+
+            <div class="qr-area">
+                <img src="@($"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={ingressoSelecionado.Codigo}")" />
+            </div>
+            <p class="code-text">@ingressoSelecionado.Codigo</p>
+
+            <button class="btn btn-secondary" @onclick="FecharModal">Fechar</button>
+        </div>
+    </div>
+}
+
+@code {
+    private bool carregando = true;
+    private bool mostrarModalUtilizacao = false;
+    private IngressoModel ingressoSelecionado;
+    private List<IngressoModel> listaIngressosModel = new();
+    private Usuario UsuarioLogado = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            UsuarioLogado = Tools.SessionTools.GetUsuarioLogado();
+
+            if (UsuarioLogado == null)
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            await ProcurarIngressos();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erro ao carregar ingressos.");
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            carregando = false;
+        }
+    }
+
+    private async Task ProcurarIngressos()
+    {
+        var filtro = new FiltroIngresso
+            {
+                UsuarioCompraId = UsuarioLogado.Id,
+                OrderByDataCompraDesc = true
+            };
+
+        var ingressosEntities = await ingressoService.ObterTodosIngressosAsync(filtro);
+
+        listaIngressosModel = ingressosEntities
+            .Select(IngressoMapper.ToModel)
+            .ToList();
+    }
+
+    private async Task ConfirmarReembolso(IngressoModel ingresso)
+    {
+        bool confirm = await JS.InvokeAsync<bool>("confirm", $"Deseja realmente cancelar e pedir reembolso do ingresso para {ingresso.EventoTitulo}?");
+
+        if (confirm)
+        {
+            try
+            {
+                await ingressoService.DeletarIngressoAsync(ingresso.Id);
+
+                NotificationService.ShowSuccess("Reembolso/Cancelamento realizado com sucesso.");
+
+                await ProcurarIngressos();
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowError("Não foi possível processar o cancelamento.");
+            }
+        }
+    }
+
+    private void UtilizarIngresso(IngressoModel ingresso)
+    {
+        ingressoSelecionado = ingresso;
+        mostrarModalUtilizacao = true;
+    }
+
+    private void FecharModal()
+    {
+        mostrarModalUtilizacao = false;
+        ingressoSelecionado = null;
+    }
+}
