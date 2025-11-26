@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <!-- Conteúdo -->
+    <!-- ConteÃºdo -->
     <div class="page-content">
         @if (IsBusy)
         {
@@ -37,7 +37,7 @@
             <div class="empty-state">
                 <span class="empty-icon">??</span>
                 <h2>Nenhum evento criado</h2>
-                <p>Você ainda não criou nenhum evento. Comece agora mesmo!</p>
+                <p>VocÃª ainda nÃ£o criou nenhum evento. Comece agora mesmo!</p>
                 <button class="btn-primary" @onclick="CriarNovoEvento">
                     <span class="oi oi-plus"></span>
                     Criar Meu Primeiro Evento
@@ -64,7 +64,7 @@
                     </button>
                     <button class="filtro-btn @(FiltroAtual == "proximos" ? "active" : "")" 
                             @onclick='() => AplicarFiltro("proximos")'>
-                        Próximos (@EventosProximos.Count)
+                        PrÃ³ximos (@EventosProximos.Count)
                     </button>
                     <button class="filtro-btn @(FiltroAtual == "passados" ? "active" : "")" 
                             @onclick='() => AplicarFiltro("passados")'>
@@ -86,7 +86,7 @@
                             </div>
                         </div>
 
-                        <!-- Conteúdo do Card -->
+                        <!-- ConteÃºdo do Card -->
                         <div class="evento-card-content">
                             <h3 class="evento-titulo">@evento.Titulo</h3>
                             
@@ -109,7 +109,7 @@
                                 </div>
                             </div>
 
-                            <!-- Ações -->
+                            <!-- AÃ§Ãµes -->
                             <div class="evento-actions">
                                 <button class="btn-action btn-view" @onclick="() => VisualizarEvento(evento.Id)">
                                     <span class="oi oi-eye"></span>
@@ -241,7 +241,7 @@
 
     private string GetStatusTexto(EventoModel evento)
     {
-        return evento.DataInicio >= DateTime.Now ? "Próximo" : "Encerrado";
+        return evento.DataInicio >= DateTime.Now ? "PrÃ³ximo" : "Encerrado";
     }
 
     private int ObterLimiteIngressos(EventoModel evento)

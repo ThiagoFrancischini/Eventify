@@ -16,6 +16,7 @@ namespace Eventify.Models
         public DateTime? DataUso { get; set; }
         public string Codigo { get; set; } = string.Empty;
         public Guid EventoId { get; set; }
+        public EventoModel Evento { get; set; }
         public string EventoTitulo { get; set; } = string.Empty;
         public Guid CategoriaIngressoId { get; set; }
         public string CategoriaNome { get; set; } = string.Empty;

@@ -9,60 +9,88 @@
 <div class="home-container">
 
     <div class="search-bar-container">
-        <span class="oi oi-magnifying-glass search-icon" aria-hidden="true"></span>
+        <span class="bi bi-search search-icon" aria-hidden="true"></span>
         <input type="text"
-        class="search-input"
-        placeholder="Digite sua localização ou evento de interesse"
-        @bind-value="FiltroTexto"
-        @onkeyup="HandleKeyup" />
-        <button class="search-button" @onclick="ExecutarPesquisa">></button>
+               class="search-input"
+               placeholder="Busque por eventos..."
+               @bind-value="FiltroTexto"
+               @onkeyup="HandleKeyup" />
+        <button class="search-button" @onclick="ExecutarPesquisa">
+            <i class="bi bi-arrow-right"></i>
+        </button>
     </div>
 
     @if (IsBusy)
     {
-        <p>Carregando...</p>
+        <div style="text-align:center; padding: 20px;">
+            <p>Carregando eventos...</p>
+        </div>
     }
-    else{
+    else
+    {
         <h2 class="section-title">Próximos eventos</h2>
 
         @if (listaEventosProximos == null || !listaEventosProximos.Any())
         {
-            <p>Nenhum evento encontrado.</p>
+            <p style="padding:0 10px; color: #888;">Nenhum evento encontrado.</p>
         }
         else
         {
-            <div class="events-grid">
+            <div class="horizontal-scroll-container">
                 @foreach (var evento in listaEventosProximos)
                 {
                     <div class="event-card" @onclick="() => NavegarParaDetalhes(evento.Id)">
-                        <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                        @if (!string.IsNullOrEmpty(evento.ImagemEvento))
+                        {
+                            <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                        }
+                        else
+                        {
+                            <div class="card-image" style="background-color: #eee; display:flex; align-items:center; justify-content:center;">
+                                <span>Sem Imagem</span>
+                            </div>
+                        }
+
                         <div class="card-content">
                             <h3 class="card-title">@evento.Titulo</h3>
-                            <p class="card-location">@evento.Endereco.CidadeNome</p>
-                            <p class="card-date">@evento.DataInicio</p>
+                            <p class="card-location">
+                                <i class="bi bi-geo-alt-fill"></i> @evento.Endereco?.CidadeNome
+                            </p>
+                            <p class="card-date">
+                                <i class="bi bi-calendar"></i> @evento.DataInicio?.ToString("dd/MM")
+                            </p>
                         </div>
                     </div>
                 }
             </div>
         }
 
-        <h2 class="section-title">Recomendados</h2>
+        <h2 class="section-title">Recomendados para você</h2>
 
         @if (listaEventosRecomendados == null || !listaEventosRecomendados.Any())
         {
-            <p>Nenhum evento recomendado encontrado.</p>
+            <p style="padding:0 10px; color: #888;">Nenhum evento recomendado.</p>
         }
         else
         {
-            <div class="events-grid">
+            <div class="horizontal-scroll-container">
                 @foreach (var evento in listaEventosRecomendados)
                 {
-                    <div class="event-card">
-                        <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                    <div class="event-card" @onclick="() => NavegarParaDetalhes(evento.Id)">
+                        @if (!string.IsNullOrEmpty(evento.ImagemEvento))
+                        {
+                            <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                        }
+                        else
+                        {
+                            <div class="card-image" style="background-color: #eee; display:flex; align-items:center; justify-content:center;">
+                                <span>Sem Imagem</span>
+                            </div>
+                        }
                         <div class="card-content">
                             <h3 class="card-title">@evento.Titulo</h3>
-                            <p class="card-location">@evento.Endereco.CidadeNome</p>
-                            <p class="card-date">@evento.DataInicio</p>
+                            <p class="card-location">@evento.Endereco?.CidadeNome</p>
+                            <p class="card-date">@evento.DataInicio?.ToString("dd/MM")</p>
                         </div>
                     </div>
                 }

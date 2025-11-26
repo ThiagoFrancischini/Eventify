@@ -24,6 +24,7 @@ namespace Eventify.Mapping
                 DataCompra = entity.DataCompra,
                 DataUso = entity.DataUso,
                 Codigo = entity.Codigo,
+                Evento = EventoMapper.ToModel(entity.Evento),
                 EventoId = entity.EventoId,
                 EventoTitulo = entity.Evento?.Titulo ?? string.Empty,
                 CategoriaIngressoId = entity.CategoriaIngressoId,
@@ -44,6 +45,10 @@ namespace Eventify.Mapping
                 Valido = model.Valido,
                 DataCompra = model.DataCompra,
                 DataUso = model.DataUso,
+                Evento = new Evento
+                {
+                    Id = model.EventoId,
+                },
                 Codigo = model.Codigo,
                 EventoId = model.EventoId,
                 CategoriaIngressoId = model.CategoriaIngressoId

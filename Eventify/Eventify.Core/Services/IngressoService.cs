@@ -4,7 +4,6 @@ using Eventify.Core.Interfaces;
 using Eventify.Core.Interfaces.Repositories;
 using Eventify.Core.Interfaces.Services;
 
-
 namespace Eventify.Services
 {
     public class IngressoService : IIngressoService
@@ -41,8 +40,7 @@ namespace Eventify.Services
         {
             try
             {
-                var ingressos = await _unitOfWork.IngressoRepository.GetAll();
-                return ingressos.FirstOrDefault(i => i.Codigo == codigo);
+                return await _unitOfWork.IngressoRepository.GetByCodigo(codigo);
             }
             catch
             {
@@ -50,72 +48,16 @@ namespace Eventify.Services
             }
         }
 
-        public async Task<List<Ingresso>> ObterTodosIngressosAsync(FiltroIngresso? filtro = null)
+        public async Task<List<Ingresso>> ObterTodosIngressosAsync(FiltroIngresso? filtro)
         {
             try
             {
-                var ingressos = await _unitOfWork.IngressoRepository.GetAll();
-
-                if (filtro != null)
+                if(filtro == null)
                 {
-                    if (filtro.EventoId.HasValue)
-                    {
-                        ingressos = ingressos.Where(i => i.EventoId == filtro.EventoId.Value).ToList();
-                    }
-
-                    if (filtro.UsuarioCompraId.HasValue)
-                    {
-                        ingressos = ingressos.Where(i => i.UsuarioCompraId == filtro.UsuarioCompraId.Value).ToList();
-                    }
-
-                    if (filtro.CategoriaIngressoId.HasValue)
-                    {
-                        ingressos = ingressos.Where(i => i.CategoriaIngressoId == filtro.CategoriaIngressoId.Value).ToList();
-                    }
-
-                    if (filtro.Valido.HasValue)
-                    {
-                        ingressos = ingressos.Where(i => i.Valido == filtro.Valido.Value).ToList();
-                    }
-
-                    if (filtro.DataCompraInicio.HasValue)
-                    {
-                        ingressos = ingressos.Where(i => i.DataCompra >= filtro.DataCompraInicio.Value).ToList();
-                    }
-
-                    if (filtro.DataCompraFim.HasValue)
-                    {
-                        ingressos = ingressos.Where(i => i.DataCompra <= filtro.DataCompraFim.Value).ToList();
-                    }
-
-                    if (filtro.Usado.HasValue)
-                    {
-                        if (filtro.Usado.Value)
-                        {
-                            ingressos = ingressos.Where(i => i.DataUso.HasValue).ToList();
-                        }
-                        else
-                        {
-                            ingressos = ingressos.Where(i => !i.DataUso.HasValue).ToList();
-                        }
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(filtro.Codigo))
-                    {
-                        ingressos = ingressos.Where(i => i.Codigo.Contains(filtro.Codigo)).ToList();
-                    }
-
-                    if (filtro.OrderByDataCompra)
-                    {
-                        ingressos = ingressos.OrderBy(i => i.DataCompra).ToList();
-                    }
-                    else if (filtro.OrderByDataCompraDesc)
-                    {
-                        ingressos = ingressos.OrderByDescending(i => i.DataCompra).ToList();
-                    }
+                    filtro = new FiltroIngresso();
                 }
 
-                return ingressos;
+                return await _unitOfWork.IngressoRepository.GetAll(filtro);
             }
             catch
             {
@@ -198,7 +140,6 @@ namespace Eventify.Services
             {
                 var ingressosCriados = new List<Ingresso>();
 
-                // Agrupa por categoria para verificar disponibilidade
                 var ingressosPorCategoria = ingressos.GroupBy(i => i.CategoriaIngressoId);
 
                 foreach (var grupo in ingressosPorCategoria)
@@ -218,7 +159,6 @@ namespace Eventify.Services
                         return null;
                 }
 
-                // Cria os ingressos
                 foreach (var ingresso in ingressos)
                 {
                     ingresso.Id = Guid.NewGuid();
@@ -370,9 +310,8 @@ namespace Eventify.Services
         {
             try
             {
-                var ingressos = await _unitOfWork.IngressoRepository.GetAll();
-                var ingresso = ingressos.FirstOrDefault(i => i.Codigo == codigo);
-
+                var ingresso = await _unitOfWork.IngressoRepository.GetByCodigo(codigo);
+                
                 return ingresso != null && ingresso.Valido && !ingresso.DataUso.HasValue;
             }
             catch
