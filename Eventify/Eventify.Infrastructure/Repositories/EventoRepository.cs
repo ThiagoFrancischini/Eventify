@@ -78,6 +78,11 @@ namespace Eventify.Infrastructure.Repositories
             {
                 query = query.OrderBy(e => e.DataInicio);
             }
+            if (filtro.UsuarioCriacaoId != Guid.Empty)
+            {
+                query = query.Where(e => e.UsuarioCriacao != null &&
+                                         e.UsuarioCriacao.Id == filtro.UsuarioCriacaoId);
+            }
 
             return await query.ToListAsync();
         }

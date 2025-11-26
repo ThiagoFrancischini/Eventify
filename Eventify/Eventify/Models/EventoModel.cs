@@ -44,5 +44,6 @@ namespace Eventify.Models
         public bool AceiteTermos { get; set; } = false;
 
         public Guid Id { get; set; }
+        public Guid UsuarioCriacaoId { get; set; }
     }
 }

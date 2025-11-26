@@ -11,9 +11,6 @@
     <div class="page-header">
         <div class="header-content">
             <div class="header-left">
-                <button class="btn-back" @onclick="VoltarParaHome">
-                    <span class="oi oi-arrow-left"></span>
-                </button>
                 <div>
                     <h1 class="page-title">Meus Eventos</h1>
                     <p class="page-subtitle">Gerencie todos os seus eventos criados</p>
@@ -136,9 +133,6 @@
             </div>
         }
     </div>
-
-
-    }
 </div>
 
 
@@ -183,8 +177,8 @@
 
             var eventos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
             {
-                // Filtrar por organizador se necessário
-                // OrganizadorId = UsuarioLogado.Id
+                UsuarioCriacaoId = UsuarioLogado.Id
+
             });
 
             if (eventos != null && eventos.Any())
@@ -278,12 +272,7 @@
 
     private void CriarNovoEvento()
     {
-        NavigationManager.NavigateTo("/criar-evento");
-    }
-
-    private void VoltarParaHome()
-    {
-        NavigationManager.NavigateTo("/home");
+        NavigationManager.NavigateTo("/cadastro-evento");
     }
 
     private void IrParaLogin()

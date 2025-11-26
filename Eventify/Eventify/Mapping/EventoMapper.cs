@@ -71,6 +71,7 @@ namespace Eventify.Mapping
                 Descricao = entity.Descricao,
                 Categoria = entity.Categoria,
                 Id = entity.Id,
+                UsuarioCriacaoId = entity.UsuarioCriacaoId,
 
                 Endereco = entity.Endereco.ToModel() ?? new EnderecoModel(),
                 CategoriasIngresso = entity.CategoriasIngressos?
