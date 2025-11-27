@@ -6,208 +6,258 @@
 @using Eventify.Models
 @using Eventify.Core.Interfaces
 
-<div class="detalhes-evento-container">
+<div class="detalhes-prototipo-1">
     @if (ErroParser)
     {
-        <div class="error-container">
-            <p>ID do evento inválido: @EventoIdString</p>
-            <button class="btn-voltar" @onclick="VoltarParaHome">Voltar para Home</button>
+        <div class="error">
+            <h2>ID do evento inválido</h2>
+            <p>@EventoIdString</p>
+            <button class="btn-primary" @onclick="VoltarParaHome">Voltar para Home</button>
         </div>
     }
     else if (IsBusy)
     {
-        <div class="loading-container">
-            <p>Carregando...</p>
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Carregando evento...</p>
         </div>
     }
     else if (EventoAtual == null)
     {
-        <div class="error-container">
-            <p>Evento não encontrado.</p>
-            <button class="btn-voltar" @onclick="VoltarParaHome">Voltar para Home</button>
+        <div class="error">
+            <h2>Evento não encontrado</h2>
+            <p>O evento que você está procurando não existe ou foi removido.</p>
+            <button class="btn-primary" @onclick="VoltarParaHome">Voltar para Home</button>
         </div>
     }
     else
     {
-        <div class="evento-imagem-container">
-            <img src="@EventoAtual.ImagemEvento" alt="@EventoAtual.Titulo" class="evento-imagem" />
+        <!-- Hero Section com Imagem -->
+        <div class="hero-section">
+            <div class="hero-overlay"></div>
+            <img src="@EventoAtual.ImagemEvento" alt="@EventoAtual.Titulo" class="hero-image" />
 
             @if (EventoEncerrado)
             {
-                <div class="overlay-encerrado">EVENTO ENCERRADO</div>
-            }
-        </div>
-
-        <div class="evento-conteudo">
-
-            <h1 class="evento-titulo">@EventoAtual.Titulo</h1>
-
-            @if (EventoEncerrado)
-            {
-                <div class="alerta-encerrado">
-                    <span class="oi oi-warning"></span>
-                    <span>Este evento já ocorreu ou as vendas foram encerradas.</span>
+                <div class="overlay-encerrado">
+                    <span class="oi oi-ban"></span>
+                    EVENTO ENCERRADO
                 </div>
             }
 
-            <div class="evento-info">
-                <p class="evento-local">
-                    <span class="oi oi-location-pin"></span>
-                    @EventoAtual.Endereco?.CidadeNome
-                </p>
-                <p class="evento-data">
-                    <span class="oi oi-calendar"></span>
-                    @EventoAtual.DataInicio?.ToString("dd/MM/yyyy")
-                    @if (EventoAtual.HoraInicio.HasValue)
+            <div class="hero-content">
+                <button class="btn-voltar" @onclick="VoltarParaHome">
+                    <span class="oi oi-arrow-left"></span> Voltar
+                </button>
+
+                <div class="hero-info">
+                    <span class="categoria-badge">@EventoAtual.Categoria</span>
+                    <h1 class="evento-titulo">@EventoAtual.Titulo</h1>
+
+                    @if (EventoEncerrado)
                     {
-                        <span> às @EventoAtual.HoraInicio.Value.ToString(@"hh\:mm")</span>
+                        <div class="alerta-hero">
+                            <span class="oi oi-warning"></span>
+                            <span>Este evento já ocorreu ou as vendas foram encerradas</span>
+                        </div>
                     }
-                </p>
+
+                    <div class="evento-meta">
+                        <div class="meta-item">
+                            <span class="oi oi-calendar"></span>
+                            <span>@EventoAtual.DataInicio?.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="oi oi-clock"></span>
+                            <span>@EventoAtual.HoraInicio?.ToString(@"hh\:mm")</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="oi oi-location-pin"></span>
+                            <span>@EventoAtual.Endereco?.CidadeNome</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="secao">
-                <h2 class="secao-titulo">Descrição do evento</h2>
-                <p class="evento-descricao">@EventoAtual.Descricao</p>
-            </div>
+        <!-- Container Principal -->
+        <div class="main-container">
+            <div class="content-grid">
+                <!-- Coluna Principal -->
+                <div class="main-content">
+                    <!-- Descrição -->
+                    <section class="card">
+                        <h2 class="section-title">Sobre o Evento</h2>
+                        <p class="descricao-texto">@EventoAtual.Descricao</p>
+                    </section>
 
-            <div class="secao">
-                <h2 class="secao-titulo">Ingressos</h2>
+                    <!-- Ingressos -->
+                    <section class="card">
+                        <h2 class="section-title">Ingressos Disponíveis</h2>
 
-                @if (EventoAtual.CategoriasIngresso == null || !EventoAtual.CategoriasIngresso.Any())
-                {
-                    <p class="texto-vazio">Nenhum ingresso disponível.</p>
-                }
-                else
-                {
-                    <div class="ingressos-lista">
-                        @foreach (var categoria in EventoAtual.CategoriasIngresso)
+                        @if (EventoAtual.CategoriasIngresso != null && EventoAtual.CategoriasIngresso.Any())
                         {
-                            if (!quantidadesSelecionadas.ContainsKey(categoria.Id))
-                            {
-                                quantidadesSelecionadas[categoria.Id] = 1;
-                            }
-
-                            <div class="ingresso-card @(EventoEncerrado ? "card-disabled" : "")">
-
-                                <div class="ingresso-info">
-                                    <p class="ingresso-tipo">@categoria.Titulo</p>
-                                    <p class="ingresso-preco">R$ @categoria.Valor.ToString("N2")</p>
-
-                                    @if (!string.IsNullOrWhiteSpace(categoria.Descricao))
+                            <div class="ingressos-lista">
+                                @foreach (var categoria in EventoAtual.CategoriasIngresso)
+                                {
+                                    if (!quantidadesSelecionadas.ContainsKey(categoria.Id))
                                     {
-                                        <p class="ingresso-descricao">@categoria.Descricao</p>
+                                        quantidadesSelecionadas[categoria.Id] = 1;
                                     }
-                                </div>
 
-                                <div class="ingresso-acoes">
+                                    <div class="ingresso-item @(EventoEncerrado ? "ingresso-disabled" : "")">
+                                        <div class="ingresso-info-left">
+                                            <h3 class="ingresso-nome">@categoria.Titulo</h3>
+                                            @if (!string.IsNullOrWhiteSpace(categoria.Descricao))
+                                            {
+                                                <p class="ingresso-desc">@categoria.Descricao</p>
+                                            }
 
-                                    <div class="quantidade-selector">
-                                        <button class="btn-qtd"
-                                                disabled="@EventoEncerrado"
-                                                @onclick="() => AlterarQuantidade(categoria.Id, -1)">
-                                            -
-                                        </button>
+                                            @if (!EventoEncerrado)
+                                            {
+                                                <span class="ingresso-disponivel">
+                                                    <span class="oi oi-check"></span> @categoria.LimiteCompra disponíveis
+                                                </span>
+                                            }
+                                        </div>
 
-                                        <span class="qtd-numero">@quantidadesSelecionadas[categoria.Id]</span>
+                                        <div class="ingresso-info-right">
+                                            <div class="preco-container">
+                                                <div class="preco">R$ @categoria.Valor.ToString("N2")</div>
 
-                                        <button class="btn-qtd"
-                                                disabled="@EventoEncerrado"
-                                                @onclick="() => AlterarQuantidade(categoria.Id, 1)">
-                                            +
-                                        </button>
+                                                @if (!EventoEncerrado)
+                                                {
+                                                    <div class="quantidade-selector">
+                                                        <button class="btn-qtd" @onclick="() => AlterarQuantidade(categoria.Id, -1)">
+                                                            <span class="oi oi-minus">-</span>
+                                                        </button>
+                                                        <span class="qtd-numero">@quantidadesSelecionadas[categoria.Id]</span>
+                                                        <button class="btn-qtd" @onclick="() => AlterarQuantidade(categoria.Id, 1)">
+                                                            <span class="oi oi-plus">+</span>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            @if (EventoEncerrado)
+                                            {
+                                                <button class="btn-comprar btn-disabled" disabled>
+                                                    <span class="oi oi-ban"></span>
+                                                    <span>Encerrado</span>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn-comprar" @onclick="() => IrParaPagamento(categoria)">
+                                                    <span class="oi oi-cart"></span>
+                                                    <span>Comprar</span>
+                                                </button>
+                                            }
+                                        </div>
                                     </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="texto-vazio">Nenhum ingresso disponível no momento.</p>
+                        }
+                    </section>
+                </div>
 
-                                    @if (EventoEncerrado)
-                                    {
-                                        <button class="btn-comprar btn-disabled" disabled>
-                                            Encerrado
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn-comprar" @onclick="() => IrParaPagamento(categoria)">
-                                            <span class="oi oi-cart"></span> Comprar
-                                        </button>
-                                    }
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- Localização -->
+                    <div class="card card-sticky">
+                        <h3 class="section-title">Localização</h3>
+
+                        @if (EventoAtual.Endereco != null)
+                        {
+                            <div class="localizacao-info">
+                                <div class="loc-item">
+                                    <strong>Local: @EventoAtual.Endereco.Complemento</strong>
                                 </div>
+
+                                @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Rua))
+                                {
+                                    <div class="loc-item">
+                                        <strong>Endereço:</strong>
+                                        <span>
+                                            @EventoAtual.Endereco.Rua
+                                            @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Numero))
+                                            {
+                                                <span>, @EventoAtual.Endereco.Numero</span>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Bairro))
+                                            {
+                                                <span>, @EventoAtual.Endereco.Bairro</span>
+                                            }
+                                            
+                                        </span>
+                                    </div>
+                                    <div class="loc-item">
+                                        <strong>Cidade:</strong>
+                                        <span>@EventoAtual.Endereco.CidadeNome - RS - @EventoAtual.Endereco.Cep</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="mapa-embed">
+                                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d111584.17763160035!2d-51.26201699902851!3d-29.07598094018795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x951e43fd0d0886d9%3A0xf35411584b997579!2sUniversidade%20de%20Caxias%20do%20Sul!5e0!3m2!1spt-BR!2sbr!4v1763939367155!5m2!1spt-BR!2sbr"
+                                        width="100%"
+                                        height="100%"
+                                        style="border:0;"
+                                        allowfullscreen=""
+                                        loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
                             </div>
                         }
                     </div>
-                }
-            </div>
 
-            @if (EventoAtual.Endereco != null)
-            {
-                <div class="secao">
-                    <h2 class="secao-titulo">Localização</h2>
+                    <!-- Informações de Contato -->
+                    <div class="card card-sticky" style="margin-top: 20px;">
+                        <h3 class="section-title">Informações</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <span class="oi oi-phone"></span>
+                                <div>
+                                    <small>Telefone</small>
+                                    <span>(54) 99679-9833</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <span class="oi oi-envelope-closed"></span>
+                                <div>
+                                    <small>Email</small>
+                                    <span>contato@eventify.com</span>
+                                </div>
+                            </div>
 
-                    <div class="endereco-card">
-                        <p class="endereco-linha">
-                            <strong>Local:</strong> @EventoAtual.Endereco.CidadeNome
-                        </p>
-                        @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Rua))
-                        {
-                            <p class="endereco-linha">
-                                <strong>Endereço:</strong>
-                                @EventoAtual.Endereco.Rua
-                                @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Numero))
-                                {
-                                    <span>, @EventoAtual.Endereco.Numero</span>
-                                }
-                            </p>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Bairro))
-                        {
-                            <p class="endereco-linha">
-                                <strong>Bairro:</strong> @EventoAtual.Endereco.Bairro
-                            </p>
-                        }
-                        <p class="endereco-linha">
-                            <strong>Cidade:</strong> @EventoAtual.Endereco.CidadeNome - RS
-                        </p>
-                        @if (!string.IsNullOrWhiteSpace(EventoAtual.Endereco.Cep))
-                        {
-                            <p class="endereco-linha">
-                                <strong>CEP:</strong> @EventoAtual.Endereco.Cep
-                            </p>
-                        }
-                    </div>
-
-                    <div class="mapa-container">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d111584.17763160035!2d-51.26201699902851!3d-29.07598094018795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x951e43fd0d0886d9%3A0xf35411584b997579!2sUniversidade%20de%20Caxias%20do%20Sul!5e0!3m2!1spt-BR!2sbr!4v1763939367155!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    </div>
-                </div>
-            }
-
-            <div class="secao">
-                <h2 class="secao-titulo">Mais informações</h2>
-                <div class="info-card">
-                    <p class="info-item">
-                        <span class="oi oi-phone"></span>
-                        <strong>Telefone:</strong> (54) 99679-9833
-                    </p>
-                    <p class="info-item">
-                        <span class="oi oi-envelope-closed"></span>
-                        <strong>Email:</strong> contato@eventify.com
-                    </p>
-
-                    @if (EventoAtual.DataTermino.HasValue)
-                    {
-                        <p class="info-item">
-                            <span class="oi oi-clock"></span>
-                            <strong>Término:</strong>
-                            @EventoAtual.DataTermino.Value.ToString("dd/MM/yyyy")
-                            @if (EventoAtual.HoraFim.HasValue)
+                            @if (EventoAtual.DataTermino.HasValue)
                             {
-                                <span> às @EventoAtual.HoraFim.Value.ToString(@"hh\:mm")</span>
+                                <div class="info-item">
+                                    <span class="oi oi-clock"></span>
+                                    <div>
+                                        <small>Término</small>
+                                        <span>
+                                            @EventoAtual.DataTermino.Value.ToString("dd/MM/yyyy")
+                                            @if (EventoAtual.HoraFim.HasValue)
+                                            {
+                                                <span> às @EventoAtual.HoraFim.Value.ToString(@"hh\:mm")</span>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
                             }
-                        </p>
-                    }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     }
 </div>
+
 
 @code {
     [Parameter]
@@ -295,7 +345,6 @@
         if (quantidadesSelecionadas.TryGetValue(categoria.Id, out int qtd))
         {
             PedidoService.IniciarPedido(EventoAtual, categoria, qtd);
-
             NavigationManager.NavigateTo("/pagamento");
         }
     }
