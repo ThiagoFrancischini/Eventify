@@ -7,6 +7,7 @@ namespace Eventify.Models
 {
     public class CategoriaIngressoModel
     {
+        public Guid Id { get; set; }
         [Required(ErrorMessage = "O título do ingresso é obrigatório.")]
         [StringLength(100, ErrorMessage = "O título não pode exceder 100 caracteres.")]
         public string Titulo { get; set; } = string.Empty;

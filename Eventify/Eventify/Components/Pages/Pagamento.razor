@@ -2,6 +2,8 @@
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 @inject Models.States.PedidoStateService PedidoService
+@inject IIngressoService IngressoService
+@inject INotificationService NotificationService
 
 <div class="payment-container p-3">
     <h3>Pagamento</h3>
@@ -42,7 +44,7 @@
             }
             else
             {
-                <h4>Total a pagar: R$ @valorIng.ToString("n2")</h4>
+                <h4>Total a pagar: R$ @valorTotal.ToString("n2")</h4>
                 <p class="mb-2">Escaneie o QR Code abaixo com seu app do banco:</p>
 
                 <div class="qr-code-placeholder mb-3" id="qrcode-container">
@@ -187,27 +189,56 @@
     private bool estaCarregandoCartao = false;
     private bool pagamentoConfirmadoCartao = false;
 
-    private object ingresso;
-    private double valorIng;
-
+    private bool pedidoValido = false;
+    private double valorTotal = 0;
+    private bool estaCarregando = false;
+    private bool pagamentoConfirmado = false;
+    private Usuario UsuarioLogado;
 
     protected override async Task OnInitializedAsync()
     {
-        TipoPagamento = enTipoPagamento.Pix;
+        UsuarioLogado = Tools.SessionTools.GetUsuarioLogado();
 
-        ingresso = PedidoService.IngressoAtual;
-
-        if (ingresso == null )
+        if (UsuarioLogado == null)
         {
-            // await Task.Delay(1500);
-            // NavigationManager.NavigateTo("/home");
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
 
-            valorIng = 200.50;
+        if (PedidoService.TemPedidoValido())
+        {
+            pedidoValido = true;
+            valorTotal = (double)PedidoService.CategoriaSelecionada.Valor * PedidoService.Quantidade;
         }
         else
         {
-            TipoPagamento = enTipoPagamento.Pix;
+            pedidoValido = false;
+            NavigationManager.NavigateTo("/home");
         }
+    }
+
+    private async Task FinalizarCompra()
+    {
+        var listaIngressosParaCriar = new List<Ingresso>();
+
+        for (int i = 0; i < PedidoService.Quantidade; i++)
+        {
+            listaIngressosParaCriar.Add(new Ingresso
+                {
+                    EventoId = PedidoService.EventoSelecionado.Id,
+                    CategoriaIngressoId = PedidoService.CategoriaSelecionada.Id,
+                    UsuarioCompraId = UsuarioLogado.Id,
+                    DataCompra = DateTime.Now,
+                    Valido = true,
+                    Codigo = Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                });
+        }
+
+        await IngressoService.CriarIngressosEmLoteAsync(listaIngressosParaCriar);
+
+        pagamentoConfirmado = true;
+        PedidoService.LimparPedido();
+        NotificationService.ShowSuccess("Compra realizada com sucesso!");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -220,7 +251,7 @@
 
     private void NavegarParaIngressos()
     {
-        NavigationManager.NavigateTo("/home");
+        NavigationManager.NavigateTo("/meus-ingressos");
     }
 
     private async Task MudarTipoPagamento(enTipoPagamento novoTipo)
@@ -255,19 +286,45 @@
     {
         estaCarregandoPix = true;
         StateHasChanged();
-        await Task.Delay(1250);
-        estaCarregandoPix = false;
-        pagamentoConfirmadoPix = true;
-        StateHasChanged();
+
+        try
+        {
+            await FinalizarCompra();
+            estaCarregandoPix = false;
+            pagamentoConfirmadoPix = true;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erro ao gerar ingressos: " + ex.Message);
+            estaCarregandoPix = false;
+            pagamentoConfirmadoPix = false;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     private async Task SimularPagamentoCartao()
     {
         estaCarregandoCartao = true;
         StateHasChanged();
-        await Task.Delay(1250);
-        estaCarregandoCartao = false;
-        pagamentoConfirmadoCartao = true;
-        StateHasChanged();
+
+        try
+        {
+            await FinalizarCompra();
+            estaCarregandoCartao = false;
+            pagamentoConfirmadoCartao = true;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erro ao gerar ingressos: " + ex.Message);
+            estaCarregandoCartao = false;
+            pagamentoConfirmadoCartao = false;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 }

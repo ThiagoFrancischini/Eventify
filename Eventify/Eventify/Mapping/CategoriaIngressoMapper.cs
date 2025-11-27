@@ -10,6 +10,7 @@ namespace Eventify.Mapping
         {
             return new CategoriaIngresso
             {
+                Id = model.Id,
                 Titulo = model.Titulo,
                 Descricao = model.Descricao,
                 Valor = model.Valor,
@@ -37,6 +38,7 @@ namespace Eventify.Mapping
 
             return new CategoriaIngressoModel
             {
+                Id = entity.Id,
                 Titulo = entity.Titulo,
                 Descricao = entity.Descricao,
                 Valor = entity.Valor,

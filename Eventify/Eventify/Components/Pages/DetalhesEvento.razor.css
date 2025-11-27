@@ -24,9 +24,9 @@
     font-size: 16px;
 }
 
-    .btn-voltar:hover {
-        background-color: #E67A32;
-    }
+.btn-voltar:hover {
+    background-color: #E67A32;
+}
 
 
 .btn-back {
@@ -265,4 +265,127 @@
     .secao-titulo {
         font-size: 16px;
     }
+}
+
+.ingresso-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+}
+
+.ingresso-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.ingresso-acoes {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.quantidade-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.btn-qtd {
+    background: #f8f9fa;
+    border: none;
+    padding: 5px 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    .btn-qtd:hover {
+        background: #e2e6ea;
+    }
+
+.qtd-numero {
+    padding: 0 10px;
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+}
+
+.btn-comprar {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    .btn-comprar:hover {
+        background-color: #c2185b;
+    }
+
+.evento-imagem-container {
+    position: relative;
+}
+
+.overlay-encerrado {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    backdrop-filter: blur(2px);
+}
+
+.alerta-encerrado {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.ingresso-card.card-disabled {
+    background-color: #f9f9f9;
+    border-color: #e0e0e0;
+    opacity: 0.7;
+}
+
+    .ingresso-card.card-disabled .ingresso-tipo,
+    .ingresso-card.card-disabled .ingresso-preco {
+        color: #999;
+    }
+
+.btn-comprar.btn-disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+    .btn-comprar.btn-disabled:hover {
+        background-color: #ccc;
+    }
+
+.btn-qtd:disabled {
+    color: #ccc;
+    cursor: not-allowed;
 }
