@@ -400,7 +400,7 @@
         }
         catch (Exception ex)
         {
-            NotificationService.ShowError("Falha ao cadastrar o evento. Tente novamente.");
+            NotificationService.ShowError($"Falha ao cadastrar o evento. {ex.Message}");
         }
     }
     

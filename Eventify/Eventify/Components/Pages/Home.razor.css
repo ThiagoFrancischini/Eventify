@@ -60,12 +60,15 @@
     color: #333;
 }
 
-.home-container {
-    max-width: 100%;
-    width: 100%;
-    overflow-x: hidden;
-    padding: 10px;
-    box-sizing: border-box;
+    .section-title.text-muted {
+        color: #6c757d;
+        margin-top: 30px;
+    }
+
+.empty-state-msg {
+    padding: 15px 10px;
+    color: #888;
+    font-style: italic;
 }
 
 .horizontal-scroll-container {
@@ -73,14 +76,12 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 15px;
-    padding: 10px 5px 15px 5px;
-
+    padding: 10px 5px 20px 5px;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
 }
-
 
     .horizontal-scroll-container::-webkit-scrollbar {
         height: 8px;
@@ -111,6 +112,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     cursor: pointer;
     transition: transform 0.2s;
+    overflow: hidden;
 }
 
     .event-card:hover {
@@ -121,6 +123,17 @@
     width: 100%;
     height: 140px;
     object-fit: cover;
+    display: block;
+}
+
+.card-image-placeholder {
+    width: 100%;
+    height: 140px;
+    background-color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
 }
 
 .card-content {
@@ -140,4 +153,34 @@
     font-size: 0.8rem;
     color: #666;
     margin: 2px 0;
+}
+
+/* Estilos Específicos para Eventos Passados */
+.event-card.card-disabled {
+    opacity: 0.8;
+    background-color: #f9f9f9;
+    box-shadow: none;
+    border: 1px solid #eee;
+}
+
+    .event-card.card-disabled:hover {
+        transform: none;
+        opacity: 1;
+    }
+
+.image-wrapper {
+    position: relative;
+}
+
+.badge-encerrado {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 3px;
+    font-weight: bold;
 }

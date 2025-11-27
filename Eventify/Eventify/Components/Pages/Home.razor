@@ -3,18 +3,20 @@
 @inject IEstadoService estadoService
 @inject ICidadeService cidadeService
 @inject IEventoService eventoService
+@inject INotificationService NotificationService
 
-@using Eventify.Models 
+@using Eventify.Models
+@using Eventify.Core.Filtros
 
 <div class="home-container">
 
     <div class="search-bar-container">
         <span class="bi bi-search search-icon" aria-hidden="true"></span>
         <input type="text"
-               class="search-input"
-               placeholder="Busque por eventos..."
-               @bind-value="FiltroTexto"
-               @onkeyup="HandleKeyup" />
+        class="search-input"
+        placeholder="Busque por eventos..."
+        @bind-value="FiltroTexto"
+        @onkeyup="HandleKeyup" />
         <button class="search-button" @onclick="ExecutarPesquisa">
             <i class="bi bi-arrow-right"></i>
         </button>
@@ -22,8 +24,11 @@
 
     @if (IsBusy)
     {
-        <div style="text-align:center; padding: 20px;">
-            <p>Carregando eventos...</p>
+        <div style="text-align:center; padding: 40px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p style="margin-top: 10px; color: #666;">Buscando os melhores eventos...</p>
         </div>
     }
     else
@@ -32,7 +37,9 @@
 
         @if (listaEventosProximos == null || !listaEventosProximos.Any())
         {
-            <p style="padding:0 10px; color: #888;">Nenhum evento encontrado.</p>
+            <div class="empty-state-msg">
+                <p>Nenhum evento futuro encontrado no momento.</p>
+            </div>
         }
         else
         {
@@ -46,7 +53,7 @@
                         }
                         else
                         {
-                            <div class="card-image" style="background-color: #eee; display:flex; align-items:center; justify-content:center;">
+                            <div class="card-image-placeholder">
                                 <span>Sem Imagem</span>
                             </div>
                         }
@@ -69,7 +76,9 @@
 
         @if (listaEventosRecomendados == null || !listaEventosRecomendados.Any())
         {
-            <p style="padding:0 10px; color: #888;">Nenhum evento recomendado.</p>
+            <div class="empty-state-msg">
+                <p>Ainda não temos recomendações personalizadas.</p>
+            </div>
         }
         else
         {
@@ -83,7 +92,7 @@
                         }
                         else
                         {
-                            <div class="card-image" style="background-color: #eee; display:flex; align-items:center; justify-content:center;">
+                            <div class="card-image-placeholder">
                                 <span>Sem Imagem</span>
                             </div>
                         }
@@ -96,25 +105,78 @@
                 }
             </div>
         }
+
+        <h2 class="section-title text-muted">Eventos Passados</h2>
+
+        @if (listaEventosPassados == null || !listaEventosPassados.Any())
+        {
+            <div class="empty-state-msg">
+                <p>Nenhum histórico de eventos recentes.</p>
+            </div>
+        }
+        else
+        {
+            <div class="horizontal-scroll-container">
+                @foreach (var evento in listaEventosPassados)
+                {
+                    <div class="event-card card-disabled" @onclick="() => NavegarParaDetalhes(evento.Id)">
+                        <div class="image-wrapper">
+                            @if (!string.IsNullOrEmpty(evento.ImagemEvento))
+                            {
+                                <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="card-image" />
+                            }
+                            else
+                            {
+                                <div class="card-image-placeholder">
+                                    <span>Sem Imagem</span>
+                                </div>
+                            }
+                            <div class="badge-encerrado">ENCERRADO</div>
+                        </div>
+
+                        <div class="card-content">
+                            <h3 class="card-title">@evento.Titulo</h3>
+                            <p class="card-location">@evento.Endereco?.CidadeNome</p>
+                            <p class="card-date">Realizado em: @evento.DataInicio?.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     }
 </div>
 
-@code{
+@code {
     private string FiltroTexto { get; set; } = string.Empty;
+
+    // Listas separadas
     private List<EventoModel> listaEventosRecomendados = new();
     private List<EventoModel> listaEventosProximos = new();
-    private List<EventoModel> listaEventosPorDescricao = new();
+    private List<EventoModel> listaEventosPassados = new();
+
     private bool IsBusy { get; set; }
     private Usuario UsuarioLogado = new();
-
 
     protected override async Task OnInitializedAsync()
     {
         UsuarioLogado = Tools.SessionTools.GetUsuarioLogado() ?? new();
 
-        await BuscarEventosRecomendados();
+        await CarregarTodosEventos();
+    }
 
-        await BuscarEventosProximos();
+    private async Task CarregarTodosEventos()
+    {
+        IsBusy = true;
+        try
+        {
+            await BuscarEventosRecomendados();
+            await BuscarEventosProximos();
+            await BuscarEventosPassados();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private void NavegarParaDetalhes(Guid eventoId)
@@ -129,66 +191,79 @@
         }
     }
 
-    private async Task BuscarEventosRecomendados()
-    {
-        try
-        {
-            IsBusy = true;
-
-            listaEventosRecomendados = new();
-
-            var eventosRecomendados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
-                {
-                //EstadoId = UsuarioLogado.Endereco.Cidade.EstadoId,
-                    OrderByMaisVendidos = true
-                });
-
-            if (eventosRecomendados != null && eventosRecomendados.Count > 0)
-            {
-                foreach (var item in eventosRecomendados)
-                {
-                    listaEventosRecomendados.Add(Mapping.EventoMapper.ToModel(item));
-                }
-            }
-        }
-        catch
-        {
-            //TRATAR ERRO
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
     private async Task BuscarEventosProximos()
     {
         try
         {
-            IsBusy = true;
-
             listaEventosProximos = new();
-
-            var eventosProximos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
-            {
-                //CidadeId = UsuarioLogado.Endereco.CidadeId,
-            });
-
-            if (eventosProximos != null && eventosProximos.Count > 0)
-            {
-                foreach (var item in eventosProximos)
+            var filtro = new FiltroEvento
                 {
-                    listaEventosProximos.Add(Mapping.EventoMapper.ToModel(item));
-                }
+                    Titulo = FiltroTexto,
+                    DataMin = DateTime.Now
+                };
+
+            var eventos = await eventoService.ObterTodosEventosAsync(filtro);
+
+            if (eventos != null)
+            {
+                listaEventosProximos = eventos.Select(e => Mapping.EventoMapper.ToModel(e)).ToList();
             }
         }
-        catch
+        catch (Exception ex)
         {
-            //TRATAR ERRO
+            NotificationService.ShowError($"Falha ao buscar os eventos proximos. {ex.Message}");
         }
-        finally
+    }
+
+    private async Task BuscarEventosRecomendados()
+    {
+        try
         {
-            IsBusy = false;
+            listaEventosRecomendados = new();
+            var filtro = new FiltroEvento
+                {
+                    Titulo = FiltroTexto,
+                    OrderByMaisVendidos = true,
+                    DataMin = DateTime.Now
+                };
+
+            var eventos = await eventoService.ObterTodosEventosAsync(filtro);
+
+            if (eventos != null)
+            {
+                listaEventosRecomendados = eventos.Select(e => Mapping.EventoMapper.ToModel(e)).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Falha ao buscar os eventos recomendados. {ex.Message}");
+        }
+    }
+
+    private async Task BuscarEventosPassados()
+    {
+        try
+        {
+            listaEventosPassados = new();
+            var filtro = new FiltroEvento
+                {
+                    Titulo = FiltroTexto,
+                    DataMax = DateTime.Now
+                };
+
+            var eventos = await eventoService.ObterTodosEventosAsync(filtro);
+
+            if (eventos != null)
+            {
+                listaEventosPassados = eventos
+                    .Select(e => Mapping.EventoMapper.ToModel(e))
+                    .OrderByDescending(x => x.DataInicio)
+                    .ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Falha ao buscar os eventos passados. {ex.Message}");
         }
     }
 
@@ -202,56 +277,6 @@
 
     private async Task ExecutarPesquisa()
     {
-        try
-        {
-            IsBusy = true;
-
-            if (string.IsNullOrWhiteSpace(FiltroTexto))
-            {
-                await BuscarEventosRecomendados();
-                await BuscarEventosProximos();
-                return;
-            }
-
-            listaEventosProximos = new();
-            var eventosProximos = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
-                {
-                //CidadeId = UsuarioLogado.Endereco.CidadeId,
-                    Titulo = FiltroTexto,
-                });
-
-            if (eventosProximos != null && eventosProximos.Count > 0)
-            {
-                foreach (var item in eventosProximos)
-                {
-                    listaEventosProximos.Add(Mapping.EventoMapper.ToModel(item));
-                }
-            }
-
-            listaEventosRecomendados = new();
-            var eventosRecomendados = await eventoService.ObterTodosEventosAsync(new Core.Filtros.FiltroEvento
-                {
-                //EstadoId = UsuarioLogado.Endereco.Cidade.EstadoId,
-                    OrderByMaisVendidos = true,
-                    Titulo = FiltroTexto,
-                });
-
-            if (eventosRecomendados != null && eventosRecomendados.Count > 0)
-            {
-                foreach (var item in eventosRecomendados)
-                {
-                    listaEventosRecomendados.Add(Mapping.EventoMapper.ToModel(item));
-                }
-            }
-        }
-        catch
-        {
-            //TRATAR ERRO
-        }
-        finally
-        {
-            IsBusy = false;
-            StateHasChanged();
-        }
+        await CarregarTodosEventos();
     }
 }
