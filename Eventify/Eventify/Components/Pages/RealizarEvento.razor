@@ -1,0 +1,268 @@
+﻿@page "/validar-ingresso/{EventoStringId}"
+@inject IEventoService eventoService
+@inject IIngressoService ingressoService
+@inject NavigationManager NavigationManager
+@inject INotificationService NotificationService
+@using Eventify.Models
+
+<div class="validacao-page">
+    <div class="page-header-simple">
+        <button class="btn-voltar" @onclick="Voltar">
+            <span class="oi oi-arrow-left"></span>
+        </button>
+        <div>
+            <h1>@(EventoSelecionado?.Titulo ?? "Carregando Evento...")</h1>
+            @if (EventoSelecionado != null)
+            {
+                <span style="font-size: 12px; opacity: 0.8; display: block;">@EventoSelecionado.DataInicio?.ToString("dd/MM/yyyy")</span>
+            }
+        </div>
+    </div>
+
+    <div class="validacao-content">
+
+        @if (EventoSelecionado == null)
+        {
+            <div class="loading-container" style="text-align: center; padding: 40px;">
+                <div class="spinner-small"></div>
+                <p>Buscando dados do evento...</p>
+            </div>
+        }
+        else
+        {
+            <div class="scan-card">
+                <div class="icon-header">
+                    <span class="oi oi-barcode"></span>
+                </div>
+                <h2>Validar Ingresso</h2>
+                <p>Digite o código do ingresso abaixo</p>
+
+                <div class="input-group">
+                    <input type="text"
+                    @bind-value="CodigoIngresso"
+                    @bind-value:event="oninput"
+                    @onkeypress="HandleEnter"
+                    placeholder="Ex: #123456"
+                    class="input-codigo"
+                    disabled="@IsLoading"
+                    id="inputCodigo" />
+
+                    @if (!string.IsNullOrEmpty(CodigoIngresso))
+                    {
+                        <button class="btn-clear" @onclick="LimparCampo">
+                            <span class="oi oi-x"></span>
+                        </button>
+                    }
+                </div>
+
+                <button class="btn-validar" @onclick="ProcurarCodigo" disabled="@(string.IsNullOrWhiteSpace(CodigoIngresso) || IsLoading)">
+                    @if (IsLoading)
+                    {
+                        <div class="spinner-small"></div>
+                    }
+                    else
+                    {
+                        <span>Verificar Ingresso</span>
+                    }
+                </button>
+            </div>
+
+            @if (IngressoEncontrado != null)
+            {
+                <div class="ticket-result-card @GetStatusClass()">
+
+                    <div class="result-header">
+                        <span class="oi @GetStatusIcon()"></span>
+                        <h3>@IngressoEncontrado.Status</h3>
+                    </div>
+
+                    <div class="result-body">
+
+                        <div class="detail-group highlight">
+                            <label>Comprador</label>
+                            <span class="value">@IngressoEncontrado.UsuarioCompraNome</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-group">
+                                <label>Categoria</label>
+                                <span class="value">@IngressoEncontrado.CategoriaNome</span>
+                            </div>
+                            <div class="detail-group text-right">
+                                <label>Valor</label>
+                                <span class="value">@IngressoEncontrado.CategoriaValor.ToString("C")</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-group">
+                                <label>Data Compra</label>
+                                <span class="value small">@IngressoEncontrado.DataCompraFormatada</span>
+                            </div>
+                            @if (IngressoEncontrado.Usado)
+                            {
+                                <div class="detail-group text-right">
+                                    <label>Utilizado em</label>
+                                    <span class="value small">@IngressoEncontrado.DataUsoFormatada</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="result-footer">
+                        @if (IngressoEncontrado.Valido && !IngressoEncontrado.Usado)
+                        {
+                            <button class="btn-confirmar-uso" @onclick="ConfirmarEntrada">
+                                <span class="oi oi-check"></span> Confirmar Entrada
+                            </button>
+                        }
+
+                        <button class="btn-proximo" @onclick="LimparParaProximo">
+                            Limpar / Próximo
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string EventoStringId 
+    {
+        set
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return;
+            }
+
+            Guid.TryParse(value, out Guid id);
+
+            EventoId = id;
+        } 
+    }
+
+    public Guid EventoId { get; set; }
+    private EventoModel? EventoSelecionado { get; set; }
+    private IngressoModel? IngressoEncontrado { get; set; }
+    private string CodigoIngresso { get; set; } = string.Empty;
+    private bool IsLoading { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            EventoSelecionado = EventoMapper.ToModel(await eventoService.ObterEventoPorIdAsync(EventoId));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar evento: {ex.Message}");
+        }
+    }
+
+    private async Task HandleEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(CodigoIngresso))
+        {
+            await ProcurarCodigo();
+        }
+    }
+
+    private async Task ProcurarCodigo()
+    {
+        if (string.IsNullOrWhiteSpace(CodigoIngresso)) return;
+
+        IsLoading = true;
+
+        try
+        {
+            IngressoEncontrado = null;
+
+            await Task.Delay(800);
+
+            var ingresso = await ingressoService.ObterIngressoPorCodigoAsync(CodigoIngresso);
+
+            if(ingresso == null || ingresso.Id == Guid.Empty)
+            {
+                throw new ApplicationException("Ingresso não encontrado!");
+            }
+
+            if(ingresso.Evento.Id != EventoSelecionado.Id)
+            {
+                throw new ApplicationException("Ingresso não é deste evento!");
+            }
+
+            IngressoEncontrado = IngressoMapper.ToModel(ingresso);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError(ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+            CodigoIngresso = string.Empty;
+        }
+    }
+
+    private async Task ConfirmarEntrada()
+    {
+        if (IngressoEncontrado == null) return;
+
+        try
+        {
+            NotificationService.ShowSuccess("Entrada confirmada!");
+
+            bool sucesso = await ingressoService.UsarIngressoAsync(IngressoEncontrado.Id);
+
+            if (!sucesso)
+            {
+                throw new ApplicationException("Ingresso não encontrado!");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erro ao confirmar entrada: " + ex.Message);
+        }
+        finally
+        {
+            LimparParaProximo();
+        }
+    }
+
+    private void LimparCampo()
+    {
+        CodigoIngresso = string.Empty;
+    }
+
+    private void LimparParaProximo()
+    {
+        CodigoIngresso = string.Empty;
+        IngressoEncontrado = null;
+        StateHasChanged();
+    }
+
+    private void Voltar()
+    {
+        NavigationManager.NavigateTo("/meus-eventos");
+    }
+
+    private string GetStatusClass()
+    {
+        if (IngressoEncontrado == null) return "";
+        if (!IngressoEncontrado.Valido) return "status-invalid";
+        if (IngressoEncontrado.Usado) return "status-used";
+        return "status-valid";
+    }
+
+    private string GetStatusIcon()
+    {
+        if (IngressoEncontrado == null) return "";
+        if (!IngressoEncontrado.Valido) return "oi-circle-x";
+        if (IngressoEncontrado.Usado) return "oi-warning";
+        return "oi-circle-check";
+    }
+}

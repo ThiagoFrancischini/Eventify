@@ -1,0 +1,174 @@
+﻿@page "/resumo-evento/{EventoStringId}"
+@inject IIngressoService ingressoService
+@inject IEventoService eventoService
+@inject NavigationManager NavigationManager
+@using Eventify.Models
+
+<div class="dashboard-page">
+    <div class="page-header-simple">
+        <button class="btn-voltar" @onclick="Voltar">
+            Voltar
+            <span class="oi oi-arrow-left"></span>
+        </button>
+        <div>
+            <h1>Dashboard do Evento</h1>
+            <p style="opacity: 0.9; font-size: 14px; margin: 0;">@(EventoNome ?? "Carregando...")</p>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        @if (IsLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner-small"></div>
+                <p>Calculando estatísticas...</p>
+            </div>
+        }
+        else
+        {
+            <div class="kpi-grid">
+                <div class="kpi-card money">
+                    <div class="kpi-icon">
+                        <span class="oi oi-dollar"></span>
+                    </div>
+                    <div class="kpi-info">
+                        <label>Faturamento Total</label>
+                        <span class="value">@DadosResumo.FaturamentoTotal.ToString("C")</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card tickets">
+                    <div class="kpi-icon">
+                        <span class="oi oi-tags"></span>
+                    </div>
+                    <div class="kpi-info">
+                        <label>Ingressos Vendidos</label>
+                        <span class="value">@DadosResumo.TotalVendidos</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card checkin">
+                    <div class="kpi-icon">
+                        <span class="oi oi-people"></span>
+                    </div>
+                    <div class="kpi-info">
+                        <label>Público Presente</label>
+                        <span class="value">@DadosResumo.TotalCheckins / @DadosResumo.TotalVendidos</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: @(DadosResumo.PorcentagemCheckin)%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3>Vendas por Categoria</h3>
+
+                <div class="category-list">
+                    @foreach (var cat in DadosResumo.VendasPorCategoria)
+                    {
+                        <div class="category-item">
+                            <div class="cat-info">
+                                <span class="cat-name">@cat.NomeCategoria</span>
+                                <span class="cat-price">@cat.ValorUnitario.ToString("C") / un</span>
+                            </div>
+                            <div class="cat-stats">
+                                <div class="stat-pill">
+                                    <span class="oi oi-cart"></span> @cat.QuantidadeVendida
+                                </div>
+                                <div class="stat-pill money">
+                                    <span class="oi oi-dollar"></span> @cat.Subtotal.ToString("N2")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string EventoStringId { get; set; }
+
+    public Guid EventoId { get; set; }
+    private string EventoNome { get; set; }
+    private bool IsLoading { get; set; } = true;
+
+    private ResumoDashboard DadosResumo { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Guid.TryParse(EventoStringId, out Guid id))
+        {
+            EventoId = id;
+            await CarregarDados();
+        }
+    }
+
+    private async Task CarregarDados()
+    {
+        try
+        {
+            IsLoading = true;
+            var evento = await eventoService.ObterEventoPorIdAsync(EventoId);
+            EventoNome = evento?.Titulo;
+
+            var ingressos = IngressoMapper.ToModelList(await ingressoService.ObterIngressosPorEventoAsync(EventoId));
+
+            CalcularEstatisticas(ingressos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void CalcularEstatisticas(List<IngressoModel> ingressos)
+    {
+        DadosResumo = new ResumoDashboard
+            {
+                TotalVendidos = ingressos.Count,
+                FaturamentoTotal = ingressos.Sum(i => i.CategoriaValor),
+                TotalCheckins = ingressos.Count(i => i.Usado),
+
+                VendasPorCategoria = ingressos
+                    .GroupBy(i => i.CategoriaNome)
+                    .Select(g => new CategoriaStats
+                    {
+                        NomeCategoria = g.Key,
+                        QuantidadeVendida = g.Count(),
+                        ValorUnitario = g.First().CategoriaValor,
+                        Subtotal = g.Sum(x => x.CategoriaValor)
+                    })
+                    .OrderByDescending(x => x.Subtotal)
+                    .ToList()
+            };
+    }
+
+    private void Voltar() => NavigationManager.NavigateTo("/meus-eventos");
+
+    public class ResumoDashboard
+    {
+        public int TotalVendidos { get; set; }
+        public decimal FaturamentoTotal { get; set; }
+        public int TotalCheckins { get; set; }
+
+        public double PorcentagemCheckin => TotalVendidos == 0 ? 0 : ((double)TotalCheckins / TotalVendidos) * 100;
+
+        public List<CategoriaStats> VendasPorCategoria { get; set; } = new();
+    }
+
+    public class CategoriaStats
+    {
+        public string NomeCategoria { get; set; }
+        public int QuantidadeVendida { get; set; }
+        public decimal ValorUnitario { get; set; }
+        public decimal Subtotal { get; set; }
+    }
+}

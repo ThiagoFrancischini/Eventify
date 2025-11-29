@@ -7,21 +7,21 @@ namespace Eventify.Core.Services
 {
     public class EventoService : IEventoService
     {
-        private readonly IEventoRepository _eventoRepository;
+        private readonly IUnitOfWork uow;
 
-        public EventoService(IEventoRepository eventoRepository)
+        public EventoService(IUnitOfWork uow)
         {
-            _eventoRepository = eventoRepository;
+            this.uow = uow;
         }
 
         public async Task<List<Evento>> ObterTodosEventosAsync(FiltroEvento filtro)
         {
-            return await _eventoRepository.GetEventos(filtro);
+            return await uow.EventoRepository.GetEventos(filtro);
         }
 
         public async Task<Evento?> ObterEventoPorIdAsync(Guid id)
         {
-            return await _eventoRepository.GetById(id);
+            return await uow.EventoRepository.GetById(id);
         }
 
         public async Task CriarOuAtualizarEventoAsync(Evento evento)
@@ -31,12 +31,23 @@ namespace Eventify.Core.Services
                 throw new InvalidOperationException("A data de término do evento não pode ser anterior à data de início.");
             }            
 
-            await _eventoRepository.Salvar(evento);
+            await uow.EventoRepository.Salvar(evento);
         }
 
         public async Task RemoverEventoAsync(Guid id)
         {
-            await _eventoRepository.Remover(id);
+            var ingressos = await uow.IngressoRepository.GetAll(new FiltroIngresso
+            {
+                EventoId = id,
+            });
+
+            foreach(var ingresso in ingressos)
+            {
+                ingresso.Valido = false;
+                await uow.IngressoRepository.Remover(ingresso.Id);
+            }
+
+            await uow.EventoRepository.Remover(id);
         }
     }
 }

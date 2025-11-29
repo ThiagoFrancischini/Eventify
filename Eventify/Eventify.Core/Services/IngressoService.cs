@@ -254,6 +254,7 @@ namespace Eventify.Services
                     return false;
 
                 ingresso.DataUso = DateTime.Now;
+                ingresso.Valido = false;
                 await _unitOfWork.IngressoRepository.Salvar(ingresso);
                 await _unitOfWork.CompleteAsync();
 

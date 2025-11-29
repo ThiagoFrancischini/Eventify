@@ -2,6 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject IEventoService eventoService
 @inject IUsuarioService usuarioService
+@inject INotificationService NotificationService
 
 @using Eventify.Models
 @using Eventify.Core.Interfaces
@@ -25,6 +26,41 @@
 
     <!-- Conteúdo -->
     <div class="page-content">
+        @if (MostrarModalExclusao)
+        {
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Cancelar Evento</h2>
+                        <button class="btn-close" @onclick="FecharModal" disabled="@ExcluindoEvento">
+                            <span class="oi oi-x"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        @if (ExcluindoEvento)
+                        {
+                            <div class="loading-small">
+                                <div class="spinner-small"></div>
+                                <span>Processando cancelamento...</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <p>Tem certeza que deseja cancelar este evento? Esta ação removerá o evento permanentemente e não poderá ser desfeita. Os ingressos comprados serão reembolsados.</p>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" @onclick="FecharModal" disabled="@ExcluindoEvento">
+                            Voltar
+                        </button>
+                        <button class="btn-danger" @onclick="ExcluirEventoConfirmado" disabled="@ExcluindoEvento">
+                            Confirmar Cancelamento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
         @if (IsBusy)
         {
             <div class="loading-container">
@@ -115,9 +151,9 @@
                                     <span class="oi oi-eye"></span>
                                     <span>Visualizar</span>
                                 </button>
-                                <button class="btn-action btn-edit" @onclick="() => EditarEvento(evento.Id)">
-                                    <span class="oi oi-pencil"></span>
-                                    <span>Editar</span>
+                                <button class="btn-action btn-stats" @onclick="() => RealizarEvento(evento.Id)">
+                                    <span class="oi oi-bar-chart"></span>
+                                    <span>Realizar Evento</span>
                                 </button>
                                 <button class="btn-action btn-stats" @onclick="() => VerEstatisticas(evento.Id)">
                                     <span class="oi oi-bar-chart"></span>
@@ -125,7 +161,7 @@
                                 </button>
                                 <button class="btn-action btn-delete" @onclick="() => ConfirmarExclusao(evento.Id)">
                                     <span class="oi oi-trash"></span>
-                                    <span>Excluir</span>
+                                    <span>Cancelar</span>
                                 </button>
                             </div>
                         </div>
@@ -262,7 +298,12 @@
 
     private void VerEstatisticas(Guid eventoId)
     {
-        NavigationManager.NavigateTo($"/estatisticas-evento/{eventoId}");
+        NavigationManager.NavigateTo($"/resumo-evento/{eventoId}");
+    }
+
+    private void RealizarEvento(Guid eventoId)
+    {
+        NavigationManager.NavigateTo($"/validar-ingresso/{eventoId.ToString()}");
     }
 
     private void ConfirmarExclusao(Guid eventoId)
@@ -279,5 +320,41 @@
     private void IrParaLogin()
     {
         NavigationManager.NavigateTo("/login");
+    }
+
+    private void FecharModal()
+    {
+        MostrarModalExclusao = false;
+        EventoIdParaExcluir = Guid.Empty;
+        ExcluindoEvento = false;
+    }
+
+    private async Task ExcluirEventoConfirmado()
+    {
+        if (EventoIdParaExcluir == Guid.Empty) return;
+
+        try
+        {
+            ExcluindoEvento = true;
+            StateHasChanged();
+
+            await eventoService.RemoverEventoAsync(EventoIdParaExcluir);
+
+            var eventoRemovido = ListaEventos.FirstOrDefault(e => e.Id == EventoIdParaExcluir);
+            if (eventoRemovido != null)
+            {
+                ListaEventos.Remove(eventoRemovido);
+                AplicarFiltros();
+            }
+
+            FecharModal();
+
+            NotificationService.ShowSuccess($"Evento excluído e reembolsos enviados.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao excluir evento: {ex.Message}");
+            ExcluindoEvento = false;
+        }
     }
 }

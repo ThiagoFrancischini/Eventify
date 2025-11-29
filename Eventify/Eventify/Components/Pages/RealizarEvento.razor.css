@@ -1,0 +1,380 @@
+﻿.validacao-page {
+    min-height: 100vh;
+    background: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header-simple {
+    background: linear-gradient(to right, #FF5733, #C70039);
+    padding: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+    .page-header-simple h1 {
+        font-size: 20px;
+        margin: 0;
+        font-weight: 600;
+    }
+
+.btn-voltar {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+    .btn-voltar:hover {
+        background: rgba(255,255,255,0.3);
+    }
+
+.validacao-content {
+    padding: 20px;
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Card de Input */
+.scan-card {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.icon-header {
+    font-size: 40px;
+    color: #C70039;
+    margin-bottom: 10px;
+}
+
+.scan-card h2 {
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.scan-card p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-codigo {
+    width: 100%;
+    padding: 15px;
+    font-size: 24px; /* Fonte grande para ver bem o código */
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+    letter-spacing: 2px;
+    font-family: monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+    .input-codigo:focus {
+        border-color: #C70039;
+        box-shadow: 0 0 0 4px rgba(199, 0, 57, 0.1);
+    }
+
+.btn-clear {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.btn-validar {
+    width: 100%;
+    background: #C70039;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .btn-validar:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .btn-validar:not(:disabled):hover {
+        background: #900028;
+        transform: translateY(-2px);
+    }
+
+/* Card de Resultado */
+.resultado-card {
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos de Sucesso */
+.resultado-sucesso {
+    background: #d4edda;
+    border: 2px solid #c3e6cb;
+    color: #155724;
+}
+
+    .resultado-sucesso .resultado-icon {
+        color: #28a745;
+    }
+
+/* Estilos de Erro */
+.resultado-erro {
+    background: #f8d7da;
+    border: 2px solid #f5c6cb;
+    color: #721c24;
+}
+
+    .resultado-erro .resultado-icon {
+        color: #dc3545;
+    }
+
+.resultado-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.resultado-info h3 {
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+.detalhes-ingresso {
+    background: rgba(255,255,255,0.5);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    width: 100%;
+}
+
+.detalhe-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+    .detalhe-row .label {
+        font-weight: 600;
+        opacity: 0.8;
+    }
+
+.btn-proximo {
+    margin-top: 10px;
+    background: rgba(0,0,0,0.1);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+    .btn-proximo:hover {
+        background: rgba(0,0,0,0.2);
+    }
+
+
+.ticket-result-card {
+    background: white;
+    border-radius: 16px;
+    margin-top: 24px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header do Resultado */
+.result-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: white;
+}
+
+    .result-header h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .result-header .oi {
+        font-size: 32px;
+    }
+
+/* Variações de Cores por Status */
+.status-valid .result-header {
+    background: #28a745; /* Verde */
+}
+
+.status-used .result-header {
+    background: #6c757d; /* Cinza/Laranja */
+}
+
+.status-invalid .result-header {
+    background: #dc3545; /* Vermelho */
+}
+
+/* Corpo do Resultado */
+.result-body {
+    padding: 20px;
+}
+
+.detail-group {
+    margin-bottom: 12px;
+}
+
+    .detail-group label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #999;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .detail-group .value {
+        display: block;
+        font-size: 16px;
+        color: #333;
+        font-weight: 600;
+    }
+
+        .detail-group .value.small {
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+    .detail-group.highlight .value {
+        font-size: 20px; /* Destaque para o nome do comprador */
+        color: #C70039;
+    }
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Footer com Botões */
+.result-footer {
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-confirmar-uso {
+    width: 100%;
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn-confirmar-uso:hover {
+        background: #218838;
+    }
+
+.btn-proximo {
+    width: 100%;
+    background: transparent;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-proximo:hover {
+    background: #e2e6ea;
+    color: #333;
+}
