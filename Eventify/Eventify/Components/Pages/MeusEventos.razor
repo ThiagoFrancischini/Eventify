@@ -8,7 +8,6 @@
 @using Eventify.Core.Interfaces
 
 <div class="meus-eventos-container">
-    <!-- Header -->
     <div class="page-header">
         <div class="header-content">
             <div class="header-left">
@@ -24,7 +23,6 @@
         </div>
     </div>
 
-    <!-- Conteúdo -->
     <div class="page-content">
         @if (MostrarModalExclusao)
         {
@@ -82,7 +80,6 @@
         }
         else
         {
-            <!-- Filtros e Pesquisa -->
             <div class="filtros-section">
                 <div class="search-box">
                     <span class="oi oi-magnifying-glass search-icon"></span>
@@ -109,12 +106,10 @@
                 </div>
             </div>
 
-            <!-- Lista de Eventos -->
             <div class="eventos-grid">
                 @foreach (var evento in EventosFiltrados)
                 {
                     <div class="evento-card">
-                        <!-- Imagem com Badge de Status -->
                         <div class="evento-imagem-wrapper">
                             <img src="@evento.ImagemEvento" alt="@evento.Titulo" class="evento-imagem" />
                             <div class="evento-status-badge @GetStatusClass(evento)">
@@ -122,7 +117,6 @@
                             </div>
                         </div>
 
-                        <!-- Conteúdo do Card -->
                         <div class="evento-card-content">
                             <h3 class="evento-titulo">@evento.Titulo</h3>
                             
@@ -145,7 +139,6 @@
                                 </div>
                             </div>
 
-                            <!-- Ações -->
                             <div class="evento-actions">
                                 <button class="btn-action btn-view" @onclick="() => VisualizarEvento(evento.Id)">
                                     <span class="oi oi-eye"></span>
